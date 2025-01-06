@@ -19,14 +19,7 @@ const db = getFirestore(app);
 
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
-document.addEventListener("DOMContentLoaded", () => {
-    const totalExpectedEl = document.getElementById("total-expected");
-    const totalActualEl = document.getElementById("total-actual");
-    const totalBudgetExpectedIncomeEl = document.getElementById("total-budget-expected-income");
-    const totalBudgetExpectedExpenseEl = document.getElementById("total-budget-expected-expense");
-    const totalBudgetActualIncomeEl = document.getElementById("total-budget-actual-income");
-    const totalBudgetActualExpenseEl = document.getElementById("total-budget-actual-expense");
-});
+
 
 let categories = []; // För att lagra kategorier
 
@@ -48,70 +41,78 @@ const loadCategories = async () => {
 const saveCategoriesToFirestore = async (categories) => {
     const categoriesCollection = collection(db, "categories");
     // Rensa befintliga kategorier innan uppdatering
-    for (const category of categories) {
+    await Promise.all(categories.map(async (category) => {
         const categoryDoc = doc(db, "categories", category.id);
         await updateDoc(categoryDoc, { ...category });
-    }
+    }));
     console.log("Kategorier sparade i Firestore!");
 };
 
-// Beräkna totalsummor
-const calculateTotals = () => {
-    let totalExpectedIncome = 0;
-    let totalExpectedExpense = 0;
-    let totalActualIncome = 0;
-    let totalActualExpense = 0;
 
-    categories.forEach(category => {
-        category.items.forEach(item => {
-            const expected = parseFloat(item.expected) || 0;
-            const actual = parseFloat(item.actual) || 0;
+document.addEventListener("DOMContentLoaded", () => {
+    const totalExpectedEl = document.getElementById("total-expected");
+    const totalActualEl = document.getElementById("total-actual");
+    const totalBudgetExpectedIncomeEl = document.getElementById("total-budget-expected-income");
+    const totalBudgetExpectedExpenseEl = document.getElementById("total-budget-expected-expense");
+    const totalBudgetActualIncomeEl = document.getElementById("total-budget-actual-income");
+    const totalBudgetActualExpenseEl = document.getElementById("total-budget-actual-expense");
 
-            if (category.type === "income") {
-                totalExpectedIncome += expected;
-                totalActualIncome += actual;
-            } else {
-                totalExpectedExpense += expected;
-                totalActualExpense += actual;
-            }
+    // Uppdatera UI
+    const updateUI = (totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual) => {
+        // Kontrollera om alla element finns innan du försöker uppdatera dem
+        const elementsExist = totalBudgetExpectedIncomeEl && totalBudgetExpectedExpenseEl && totalBudgetActualIncomeEl && totalBudgetActualExpenseEl;
+        
+        if (elementsExist) {
+            totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
+            totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
+            totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
+
+            totalBudgetActualIncomeEl.textContent = `Inkomst: ${totalActualIncome.toFixed(2)} kr`;
+            totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
+            totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
+        } else {
+            console.error("Ett eller flera HTML-element har inte hittats!", {
+                totalBudgetExpectedIncomeEl,
+                totalBudgetExpectedExpenseEl,
+                totalBudgetActualIncomeEl,
+                totalBudgetActualExpenseEl
+            });
+        }
+    };
+
+    // Beräkna totalsummor
+    const calculateTotals = () => {
+        let totalExpectedIncome = 0;
+        let totalExpectedExpense = 0;
+        let totalActualIncome = 0;
+        let totalActualExpense = 0;
+
+        categories.forEach(category => {
+            category.items.forEach(item => {
+                const expected = parseFloat(item.expected) || 0;
+                const actual = parseFloat(item.actual) || 0;
+
+                if (category.type === "income") {
+                    totalExpectedIncome += expected;
+                    totalActualIncome += actual;
+                } else {
+                    totalExpectedExpense += expected;
+                    totalActualExpense += actual;
+                }
+            });
         });
-    });
 
-    const totalExpected = totalExpectedIncome - totalExpectedExpense;
-    const totalActual = totalActualIncome - totalActualExpense;
+        const totalExpected = totalExpectedIncome - totalExpectedExpense;
+        const totalActual = totalActualIncome - totalActualExpense;
 
-    // Uppdatera textinnehållet i HTML
-    updateUI(totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual);
-};
+        // Uppdatera textinnehållet i HTML
+        updateUI(totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual);
+    };
 
-// Uppdatera UI
-const updateUI = (totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual) => {
-    // Kontrollera om alla element finns innan du försöker uppdatera dem
-    const elementsExist = totalBudgetExpectedIncomeEl && totalBudgetExpectedExpenseEl && totalBudgetActualIncomeEl && totalBudgetActualExpenseEl;
-    
-    if (elementsExist) {
-        totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
-        totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
-        totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
-
-        totalBudgetActualIncomeEl.textContent = `Inkomst: ${totalActualIncome.toFixed(2)} kr`;
-        totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
-        totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
-    } else {
-        console.error("Ett eller flera HTML-element har inte hittats!", {
-            totalBudgetExpectedIncomeEl,
-            totalBudgetExpectedExpenseEl,
-            totalBudgetActualIncomeEl,
-            totalBudgetActualExpenseEl
-        });
-    }
-};
-
-
-// Kör när DOM är redo
-document.addEventListener('DOMContentLoaded', () => {
+    // Kör beräkning och uppdatera UI när DOM är redo
     calculateTotals();  // Beräkna totalsummor och uppdatera UI
 });
+
 
 // Rendera kategorier
 const renderCategories = async () => {
