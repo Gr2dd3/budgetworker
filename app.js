@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { getAnalytics } from "firebase/analytics";
 
-
+// Firebase-konfiguration
 const firebaseConfig = {
     apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
     authDomain: "ourbudget-d2b40.firebaseapp.com",
@@ -10,28 +10,10 @@ const firebaseConfig = {
     messagingSenderId: "10785224419",
     appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
     measurementId: "G-94E36FGRMZ"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-/*Tillfällig inlogg
-const validCredentials = { 
-    username: "1", 
-    passwordHash: "c4ca4238a0b923820dcc509a6f75849b" /**lösen nu: 1 
 };
-console.log("Förväntad hash för 1: " + CryptoJS.MD5("1").toString());
-*/
-
-const validCredentials = { 
-    username: "Gradin2025", 
-    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
-};
-
-const loginScreen = document.getElementById("login-screen");
-const appScreen = document.getElementById("app");
-const errorMessage = document.getElementById("error-message");
-const loginButton = document.getElementById("login-button");
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
@@ -40,30 +22,25 @@ const totalActualEl = document.getElementById("total-actual");
 const totalBudgetExpectedEl = document.getElementById("total-budget-expected");
 const totalBudgetActualEl = document.getElementById("total-budget-actual");
 
+let categories = []; // För att lagra kategorier
 
 // Hämta kategorier från Firestore
-let categories = fetchCategoriesFromFirestore();
-
-//let categories = JSON.parse(localStorage.getItem("budgetCategories")) || [];
-// Spara kategorier i localStorage
-/*const saveCategories = () => {
-    localStorage.setItem("budgetCategories", JSON.stringify(categories));
-};*/
-
-// Spara kategorier i Firestore (google)
-const saveCategoriesToFirestore = async (categories) => {
-    const categoriesCollection = collection(db, "categories");
-    for (const category of categories) {
-        await addDoc(categoriesCollection, category);
-    }
-    console.log("Kategorier sparade i Firestore!");
-};
-
 const fetchCategoriesFromFirestore = async () => {
     const categoriesCollection = collection(db, "categories");
     const snapshot = await getDocs(categoriesCollection);
     const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return categories;
+};
+
+// Spara kategorier i Firestore
+const saveCategoriesToFirestore = async (categories) => {
+    const categoriesCollection = collection(db, "categories");
+    // Rensa befintliga kategorier innan uppdatering
+    for (const category of categories) {
+        const categoryDoc = doc(db, "categories", category.id);
+        await updateDoc(categoryDoc, { ...category });
+    }
+    console.log("Kategorier sparade i Firestore!");
 };
 
 // Beräkna totalsummor
@@ -98,8 +75,10 @@ const calculateTotals = () => {
 };
 
 // Rendera kategorier
-const renderCategories = () => {
-    categoryList.innerHTML = "";
+const renderCategories = async () => {
+    categories = await fetchCategoriesFromFirestore(); // Hämta kategorier från Firestore
+    categoryList.innerHTML = ""; // Rensa befintliga kategorier
+
     categories.forEach((category, index) => {
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
@@ -111,7 +90,7 @@ const renderCategories = () => {
         title.contentEditable = true;
         title.onblur = () => {
             categories[index].name = title.textContent;
-            saveCategoriesToFirestore();
+            saveCategoriesToFirestore(categories); // Skicka med den uppdaterade kategorilistan
         };
 
         // Färgval
@@ -120,7 +99,7 @@ const renderCategories = () => {
         colorPicker.value = category.color || "#f9f9f9";
         colorPicker.onchange = () => {
             categories[index].color = colorPicker.value;
-            saveCategoriesToFirestore();
+            saveCategoriesToFirestore(categories);
             renderCategories();
         };
 
@@ -135,7 +114,7 @@ const renderCategories = () => {
         });
         typeSelect.onchange = () => {
             categories[index].type = typeSelect.value;
-            saveCategoriesToFirestore();
+            saveCategoriesToFirestore(categories);
             calculateTotals();
         };
 
@@ -164,7 +143,7 @@ const renderCategories = () => {
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
-                saveCategoriesToFirestore();
+                saveCategoriesToFirestore(categories);
             };
 
             const itemExpected = document.createElement("input");
@@ -173,7 +152,7 @@ const renderCategories = () => {
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
                 categories[index].items[itemIndex].expected = itemExpected.value;
-                saveCategoriesToFirestore();
+                saveCategoriesToFirestore(categories);
                 calculateTotals();
             };
 
@@ -183,7 +162,7 @@ const renderCategories = () => {
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
                 categories[index].items[itemIndex].actual = itemActual.value;
-                saveCategoriesToFirestore();
+                saveCategoriesToFirestore(categories);
                 calculateTotals();
             };
 
@@ -191,7 +170,7 @@ const renderCategories = () => {
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
-                saveCategoriesToFirestore();
+                saveCategoriesToFirestore(categories);
                 renderCategories();
                 calculateTotals();
             };
@@ -206,7 +185,7 @@ const renderCategories = () => {
         addItemButton.style.display = "block";
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
-            saveCategoriesToFirestore();
+            saveCategoriesToFirestore(categories);
             renderCategories();
         };
 
@@ -215,7 +194,7 @@ const renderCategories = () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
-            saveCategoriesToFirestore();
+            saveCategoriesToFirestore(categories);
             renderCategories();
             calculateTotals();
         };
@@ -224,10 +203,38 @@ const renderCategories = () => {
         categoryList.appendChild(categoryEl);
     });
 
-    calculateTotals();
+    calculateTotals(); // Beräkna totalsummor efter att kategorierna har uppdaterats
 };
 
+// Lägg till kategori
+addCategoryButton.addEventListener("click", async () => {
+    const newCategory = {
+        name: "Ny kategori",
+        type: "expense",
+        color: "#f9f9f9",
+        items: []
+    };
+
+    // Lägg till den nya kategorin i Firestore
+    const categoriesCollection = collection(db, "categories");
+    const docRef = await addDoc(categoriesCollection, newCategory);
+    newCategory.id = docRef.id;
+
+    categories.push(newCategory); // Lägg till kategorin lokalt
+    renderCategories(); // Rendera om kategorierna
+});
+
 // Inloggning
+const validCredentials = { 
+    username: "Gradin2025", 
+    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
+};
+
+const loginScreen = document.getElementById("login-screen");
+const appScreen = document.getElementById("app");
+const errorMessage = document.getElementById("error-message");
+const loginButton = document.getElementById("login-button");
+
 loginButton.addEventListener("click", () => {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -241,14 +248,5 @@ loginButton.addEventListener("click", () => {
     }
 });
 
-// Lägg till kategori
-addCategoryButton.addEventListener("click", () => {
-    categories.push({
-        name: "Ny kategori",
-        type: "expense",
-        color: "#f9f9f9",
-        items: []
-    });
-    saveCategoriesToFirestore();
-    renderCategories();
-});
+// Initiera appen
+renderCategories(); // Rendera kategorier när appen startar
