@@ -1,3 +1,21 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
+    authDomain: "ourbudget-d2b40.firebaseapp.com",
+    projectId: "ourbudget-d2b40",
+    storageBucket: "ourbudget-d2b40.firebasestorage.app",
+    messagingSenderId: "10785224419",
+    appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
+    measurementId: "G-94E36FGRMZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+
 
 /*Tillfällig inlogg*/
 const validCredentials = { 
@@ -23,11 +41,30 @@ const totalActualEl = document.getElementById("total-actual");
 const totalBudgetExpectedEl = document.getElementById("total-budget-expected");
 const totalBudgetActualEl = document.getElementById("total-budget-actual");
 
-let categories = JSON.parse(localStorage.getItem("budgetCategories")) || [];
 
+// Hämta kategorier från Firestore
+let categories = fetchCategoriesFromFirestore();
+
+//let categories = JSON.parse(localStorage.getItem("budgetCategories")) || [];
 // Spara kategorier i localStorage
-const saveCategories = () => {
+/*const saveCategories = () => {
     localStorage.setItem("budgetCategories", JSON.stringify(categories));
+};*/
+
+// Spara kategorier i Firestore (google)
+const saveCategoriesToFirestore = async (categories) => {
+    const categoriesCollection = collection(db, "categories");
+    for (const category of categories) {
+        await addDoc(categoriesCollection, category);
+    }
+    console.log("Kategorier sparade i Firestore!");
+};
+
+const fetchCategoriesFromFirestore = async () => {
+    const categoriesCollection = collection(db, "categories");
+    const snapshot = await getDocs(categoriesCollection);
+    const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return categories;
 };
 
 // Beräkna totalsummor
@@ -75,7 +112,7 @@ const renderCategories = () => {
         title.contentEditable = true;
         title.onblur = () => {
             categories[index].name = title.textContent;
-            saveCategories();
+            saveCategoriesToFirestore();
         };
 
         // Färgval
@@ -84,7 +121,7 @@ const renderCategories = () => {
         colorPicker.value = category.color || "#f9f9f9";
         colorPicker.onchange = () => {
             categories[index].color = colorPicker.value;
-            saveCategories();
+            saveCategoriesToFirestore();
             renderCategories();
         };
 
@@ -99,7 +136,7 @@ const renderCategories = () => {
         });
         typeSelect.onchange = () => {
             categories[index].type = typeSelect.value;
-            saveCategories();
+            saveCategoriesToFirestore();
             calculateTotals();
         };
 
@@ -128,7 +165,7 @@ const renderCategories = () => {
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
-                saveCategories();
+                saveCategoriesToFirestore();
             };
 
             const itemExpected = document.createElement("input");
@@ -137,7 +174,7 @@ const renderCategories = () => {
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
                 categories[index].items[itemIndex].expected = itemExpected.value;
-                saveCategories();
+                saveCategoriesToFirestore();
                 calculateTotals();
             };
 
@@ -147,7 +184,7 @@ const renderCategories = () => {
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
                 categories[index].items[itemIndex].actual = itemActual.value;
-                saveCategories();
+                saveCategoriesToFirestore();
                 calculateTotals();
             };
 
@@ -155,7 +192,7 @@ const renderCategories = () => {
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
-                saveCategories();
+                saveCategoriesToFirestore();
                 renderCategories();
                 calculateTotals();
             };
@@ -170,7 +207,7 @@ const renderCategories = () => {
         addItemButton.style.display = "block";
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
-            saveCategories();
+            saveCategoriesToFirestore();
             renderCategories();
         };
 
@@ -179,7 +216,7 @@ const renderCategories = () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
-            saveCategories();
+            saveCategoriesToFirestore();
             renderCategories();
             calculateTotals();
         };
@@ -213,6 +250,6 @@ addCategoryButton.addEventListener("click", () => {
         color: "#f9f9f9",
         items: []
     });
-    saveCategories();
+    saveCategoriesToFirestore();
     renderCategories();
 });
