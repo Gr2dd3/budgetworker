@@ -10,7 +10,7 @@ const firebaseConfig = {
     messagingSenderId: "10785224419",
     appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
     measurementId: "G-94E36FGRMZ"
-  };
+};
 
 // Initiera Firebase
 const app = initializeApp(firebaseConfig);
@@ -19,7 +19,6 @@ const db = getFirestore(app);
 
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
-
 
 let categories = []; // För att lagra kategorier
 
@@ -47,7 +46,6 @@ const saveCategoriesToFirestore = async (categories) => {
     }));
     console.log("Kategorier sparade i Firestore!");
 };
-
 
 document.addEventListener("DOMContentLoaded", () => {
     const totalExpectedEl = document.getElementById("total-expected");
@@ -118,13 +116,30 @@ document.addEventListener("DOMContentLoaded", () => {
 const renderCategories = async () => {
     categoryList.innerHTML = "";
 
-    let hasChanges = false;
-
     categories.forEach((category, index) => {
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
+        // Gör kategorin dragbar
+        categoryEl.draggable = true;
+        categoryEl.ondragstart = (event) => {
+            event.dataTransfer.setData("categoryIndex", index); // Spara indexet för dragged kategori
+        };
+
+        categoryEl.ondragover = (event) => {
+            event.preventDefault(); // Tillåt drop
+        };
+
+        categoryEl.ondrop = (event) => {
+            event.preventDefault();
+            const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
+            if (draggedCategoryIndex !== index) {
+                const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
+                categories.splice(index, 0, draggedCategory);
+                renderCategories(); // Rendera om kategorier
+            }
+        };
 
         const title = document.createElement("h3");
         title.textContent = category.name;
@@ -132,7 +147,6 @@ const renderCategories = async () => {
         title.onblur = () => {
             if (categories[index].name !== title.textContent) {
                 categories[index].name = title.textContent;
-                hasChanges = true;
             }
         };
 
@@ -143,7 +157,6 @@ const renderCategories = async () => {
         colorPicker.onchange = () => {
             if (categories[index].color !== colorPicker.value) {
                 categories[index].color = colorPicker.value;
-                hasChanges = true;
             }
         };
 
@@ -159,7 +172,6 @@ const renderCategories = async () => {
         typeSelect.onchange = () => {
             if (categories[index].type !== typeSelect.value) {
                 categories[index].type = typeSelect.value;
-                hasChanges = true;
             }
         };
 
@@ -181,13 +193,35 @@ const renderCategories = async () => {
             const itemEl = document.createElement("li");
             itemEl.classList.add("item");
 
+            // Gör item dragbart
+            itemEl.draggable = true;
+            itemEl.ondragstart = (event) => {
+                event.dataTransfer.setData("itemIndex", itemIndex); // Spara indexet för dragged item
+                event.dataTransfer.setData("categoryIndex", index); // Spara kategoriindexet
+            };
+
+            itemEl.ondragover = (event) => {
+                event.preventDefault(); // Tillåt drop
+            };
+
+            itemEl.ondrop = (event) => {
+                event.preventDefault();
+                const draggedItemIndex = event.dataTransfer.getData("itemIndex");
+                const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
+
+                if (draggedCategoryIndex === index && draggedItemIndex !== itemIndex) {
+                    const draggedItem = category.items.splice(draggedItemIndex, 1)[0];
+                    category.items.splice(itemIndex, 0, draggedItem);
+                    renderCategories(); // Rendera om kategorier och items
+                }
+            };
+
             const itemName = document.createElement("input");
             itemName.value = item.name;
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 if (categories[index].items[itemIndex].name !== itemName.value) {
                     categories[index].items[itemIndex].name = itemName.value;
-                    hasChanges = true; 
                 }
             };
 
@@ -199,7 +233,6 @@ const renderCategories = async () => {
                 const newValue = parseFloat(itemExpected.value);
                 if (categories[index].items[itemIndex].expected !== newValue) {
                     categories[index].items[itemIndex].expected = newValue;
-                    hasChanges = true; 
                 }
             };
 
@@ -211,7 +244,6 @@ const renderCategories = async () => {
                 const newValue = parseFloat(itemActual.value);
                 if (categories[index].items[itemIndex].actual !== newValue) {
                     categories[index].items[itemIndex].actual = newValue;
-                    hasChanges = true; 
                 }
             };
 
@@ -219,7 +251,6 @@ const renderCategories = async () => {
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
-                hasChanges = true; 
                 renderCategories(); 
             };
 
@@ -232,7 +263,6 @@ const renderCategories = async () => {
         addItemButton.style.display = "block";
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
-            hasChanges = true; 
             renderCategories(); 
         };
 
@@ -241,7 +271,6 @@ const renderCategories = async () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
-            hasChanges = true;
             renderCategories(); 
         };
 
@@ -249,65 +278,19 @@ const renderCategories = async () => {
         categoryList.appendChild(categoryEl);
     });
 
-    // Om några förändringar har skett, beräkna totalsummor
-    if (hasChanges) {
-        document.addEventListener("DOMContentLoaded", () => {
-            calculateTotals();
-        });
-    }
+    saveCategoriesToFirestore(categories);
 };
-
 
 // Lägg till kategori
-addCategoryButton.addEventListener("click", async () => {
-    const newCategory = {
+addCategoryButton.addEventListener("click", () => {
+    categories.push({
         name: "Ny kategori",
-        type: "expense",
         color: "#f9f9f9",
+        type: "expense",
         items: []
-    };
-
-    // Lägg till den nya kategorin i Firestore
-    const categoriesCollection = collection(db, "categories");
-    const docRef = await addDoc(categoriesCollection, newCategory);
-    newCategory.id = docRef.id;
-
-    categories.push(newCategory); // Lägg till kategorin lokalt
-    renderCategories(); // Rendera om kategorierna
+    });
+    renderCategories();
 });
 
- // Spara alla kategorier till Firestore
- const saveButton = document.getElementById("save-button");
-
-saveButton.addEventListener("click", async () => {
-    await saveCategoriesToFirestore(categories);
-    alert("Ändringarna har sparats!");
-});
-
-
-// Inloggning
-const validCredentials = { 
-    username: "Gradin2025", 
-    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
-};
-
-const loginScreen = document.getElementById("login-screen");
-const appScreen = document.getElementById("app");
-const errorMessage = document.getElementById("error-message");
-const loginButton = document.getElementById("login-button");
-
-loginButton.addEventListener("click", () => {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
-        loginScreen.classList.add("hidden");
-        appScreen.classList.remove("hidden");
-        loadCategories();
-    } else {
-        errorMessage.textContent = "Fel användarnamn eller lösenord.";
-    }
-});
-
-// Initiera appen
-renderCategories(); // Rendera kategorier när appen startar
+// Ladda data
+loadCategories();
