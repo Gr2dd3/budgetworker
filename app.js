@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
 
-// Firebase-konfiguration
 const firebaseConfig = {
     apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
     authDomain: "ourbudget-d2b40.firebaseapp.com",
@@ -10,7 +10,9 @@ const firebaseConfig = {
     messagingSenderId: "10785224419",
     appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
     measurementId: "G-94E36FGRMZ"
-};
+  };
+
+// Initiera Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);

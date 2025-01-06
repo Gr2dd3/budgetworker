@@ -8,28 +8,6 @@
 
     <!-- Lägg till CryptoJS via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
-          authDomain: "ourbudget-d2b40.firebaseapp.com",
-          projectId: "ourbudget-d2b40",
-          storageBucket: "ourbudget-d2b40.firebasestorage.app",
-          messagingSenderId: "10785224419",
-          appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
-          measurementId: "G-94E36FGRMZ"
-        };
-      
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-      </script>
 </head>
 <body>
     <div id="login-screen">
@@ -60,7 +38,6 @@
         </div>
     </div>
 
-    <!-- Lägg till din app.js med module import -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
