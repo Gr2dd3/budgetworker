@@ -21,8 +21,10 @@ const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
 const totalExpectedEl = document.getElementById("total-expected");
 const totalActualEl = document.getElementById("total-actual");
-const totalBudgetExpectedEl = document.getElementById("total-budget-expected");
-const totalBudgetActualEl = document.getElementById("total-budget-actual");
+const totalBudgetExpectedIncomeEl = document.getElementById("total-budget-expected-income");
+const totalBudgetExpectedExpenseEl = document.getElementById("total-budget-expected-expence");
+const totalBudgetActualIncomeEl = document.getElementById("total-budget-actual-income");
+const totalBudgetActualExpenseEl = document.getElementById("total-budget-actual-expence");
 
 let categories = []; // För att lagra kategorier
 
@@ -32,6 +34,12 @@ const fetchCategoriesFromFirestore = async () => {
     const snapshot = await getDocs(categoriesCollection);
     const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return categories;
+};
+
+// Hämta kategorier från Firestore
+const loadCategories = async () => {
+    categories = await fetchCategoriesFromFirestore(); 
+    renderCategories();
 };
 
 // Spara kategorier i Firestore
@@ -70,15 +78,18 @@ const calculateTotals = () => {
     const totalExpected = totalExpectedIncome - totalExpectedExpense;
     const totalActual = totalActualIncome - totalActualExpense;
 
+    // Uppdatera textinnehållet i HTML
+    totalBudgetExpectedIncomeEl.textContent = `Inkomst (förmodad): ${totalExpectedIncome.toFixed(2)} kr`;
+    totalBudgetExpectedExpenseEl.textContent = `Utgift (förmodad): ${totalExpectedExpense.toFixed(2)} kr`;
     totalExpectedEl.textContent = `Total budget (förmodad): ${totalExpected.toFixed(2)} kr`;
+
+    totalBudgetActualIncomeEl.textContent = `Inkomst (faktisk): ${totalActualIncome.toFixed(2)} kr`;
+    totalBudgetActualExpenseEl.textContent = `Utgift (faktisk): ${totalActualExpense.toFixed(2)} kr`;
     totalActualEl.textContent = `Total budget (faktisk): ${totalActual.toFixed(2)} kr`;
-    totalBudgetExpectedEl.textContent = `Inkomst (förmodad): ${totalExpectedIncome.toFixed(2)}, Utgift (förmodad): ${totalExpectedExpense.toFixed(2)} kr`;
-    totalBudgetActualEl.textContent = `Inkomst (faktisk): ${totalActualIncome.toFixed(2)}, Utgift (faktisk): ${totalActualExpense.toFixed(2)} kr`;
 };
 
 // Rendera kategorier
 const renderCategories = async () => {
-    categories = await fetchCategoriesFromFirestore(); // Hämta kategorier från Firestore
     categoryList.innerHTML = ""; // Rensa befintliga kategorier
 
     categories.forEach((category, index) => {
@@ -92,7 +103,6 @@ const renderCategories = async () => {
         title.contentEditable = true;
         title.onblur = () => {
             categories[index].name = title.textContent;
-            saveCategoriesToFirestore(categories); // Skicka med den uppdaterade kategorilistan
         };
 
         // Färgval
@@ -101,7 +111,6 @@ const renderCategories = async () => {
         colorPicker.value = category.color || "#f9f9f9";
         colorPicker.onchange = () => {
             categories[index].color = colorPicker.value;
-            saveCategoriesToFirestore(categories);
             renderCategories();
         };
 
@@ -116,7 +125,6 @@ const renderCategories = async () => {
         });
         typeSelect.onchange = () => {
             categories[index].type = typeSelect.value;
-            saveCategoriesToFirestore(categories);
             calculateTotals();
         };
 
@@ -145,7 +153,6 @@ const renderCategories = async () => {
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
-                saveCategoriesToFirestore(categories);
             };
 
             const itemExpected = document.createElement("input");
@@ -154,7 +161,6 @@ const renderCategories = async () => {
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
                 categories[index].items[itemIndex].expected = itemExpected.value;
-                saveCategoriesToFirestore(categories);
                 calculateTotals();
             };
 
@@ -164,7 +170,6 @@ const renderCategories = async () => {
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
                 categories[index].items[itemIndex].actual = itemActual.value;
-                saveCategoriesToFirestore(categories);
                 calculateTotals();
             };
 
@@ -172,7 +177,6 @@ const renderCategories = async () => {
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
-                saveCategoriesToFirestore(categories);
                 renderCategories();
                 calculateTotals();
             };
@@ -187,7 +191,6 @@ const renderCategories = async () => {
         addItemButton.style.display = "block";
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
-            saveCategoriesToFirestore(categories);
             renderCategories();
         };
 
@@ -196,7 +199,6 @@ const renderCategories = async () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
-            saveCategoriesToFirestore(categories);
             renderCategories();
             calculateTotals();
         };
@@ -226,6 +228,15 @@ addCategoryButton.addEventListener("click", async () => {
     renderCategories(); // Rendera om kategorierna
 });
 
+ // Spara alla kategorier till Firestore
+ const saveButton = document.getElementById("save-button");
+
+saveButton.addEventListener("click", async () => {
+    await saveCategoriesToFirestore(categories);
+    alert("Ändringarna har sparats!");
+});
+
+
 // Inloggning
 const validCredentials = { 
     username: "Gradin2025", 
@@ -244,7 +255,7 @@ loginButton.addEventListener("click", () => {
     if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
         loginScreen.classList.add("hidden");
         appScreen.classList.remove("hidden");
-        renderCategories();
+        loadCategories();
     } else {
         errorMessage.textContent = "Fel användarnamn eller lösenord.";
     }
