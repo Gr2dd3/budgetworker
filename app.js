@@ -79,13 +79,13 @@ const calculateTotals = () => {
     const totalActual = totalActualIncome - totalActualExpense;
 
     // Uppdatera textinnehållet i HTML
-    totalBudgetExpectedIncomeEl.textContent = `Inkomst (förmodad): ${totalExpectedIncome.toFixed(2)} kr`;
-    totalBudgetExpectedExpenseEl.textContent = `Utgift (förmodad): ${totalExpectedExpense.toFixed(2)} kr`;
-    totalExpectedEl.textContent = `Total budget (förmodad): ${totalExpected.toFixed(2)} kr`;
+    totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
+    totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
+    totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
 
-    totalBudgetActualIncomeEl.textContent = `Inkomst (faktisk): ${totalActualIncome.toFixed(2)} kr`;
-    totalBudgetActualExpenseEl.textContent = `Utgift (faktisk): ${totalActualExpense.toFixed(2)} kr`;
-    totalActualEl.textContent = `Total budget (faktisk): ${totalActual.toFixed(2)} kr`;
+    totalBudgetActualIncomeEl.textContent = `Inkomst: ${totalActualIncome.toFixed(2)} kr`;
+    totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
+    totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
 };
 
 // Rendera kategorier
