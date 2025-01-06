@@ -15,19 +15,18 @@ const firebaseConfig = {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-
-
-/*Tillfällig inlogg*/
+/*Tillfällig inlogg
 const validCredentials = { 
     username: "1", 
-    passwordHash: "c4ca4238a0b923820dcc509a6f75849b" /**lösen nu: 1 */
+    passwordHash: "c4ca4238a0b923820dcc509a6f75849b" /**lösen nu: 1 
 };
 console.log("Förväntad hash för 1: " + CryptoJS.MD5("1").toString());
+*/
 
-/*const validCredentials = { 
+const validCredentials = { 
     username: "Gradin2025", 
     passwordHash: "3af6f058eab3ac8f451704880d405ad9"
-};*/
+};
 
 const loginScreen = document.getElementById("login-screen");
 const appScreen = document.getElementById("app");
