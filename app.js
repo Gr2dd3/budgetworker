@@ -11,7 +11,7 @@ const firebaseConfig = {
     appId: "1:10785224419:web:2bfa5295fb70102934f7d6",
     measurementId: "G-94E36FGRMZ"
   };
-  
+
 // Initiera Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -79,14 +79,29 @@ const calculateTotals = () => {
     const totalActual = totalActualIncome - totalActualExpense;
 
     // Uppdatera textinnehållet i HTML
-    totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
-    totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
-    totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
-
-    totalBudgetActualIncomeEl.textContent = `Inkomst: ${totalActualIncome.toFixed(2)} kr`;
-    totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
-    totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
+    updateUI(totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual);
 };
+
+// Uppdatera UI
+const updateUI = (totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual) => {
+    // Kolla att alla element finns
+    if (totalBudgetExpectedIncomeEl && totalBudgetExpectedExpenseEl && totalBudgetActualIncomeEl && totalBudgetActualExpenseEl) {
+        totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
+        totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
+        totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
+
+        totalBudgetActualIncomeEl.textContent = `Inkomst: ${totalActualIncome.toFixed(2)} kr`;
+        totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
+        totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
+    } else {
+        console.error("Ett eller flera HTML-element har inte hittats!");
+    }
+};
+
+// Kör när DOM är redo
+document.addEventListener('DOMContentLoaded', () => {
+    calculateTotals();  // Beräkna totalsummor och uppdatera UI
+});
 
 // Rendera kategorier
 const renderCategories = async () => {
