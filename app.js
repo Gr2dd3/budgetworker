@@ -116,19 +116,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Rendera kategorier
 const renderCategories = async () => {
-    categoryList.innerHTML = ""; // Rensa befintliga kategorier
+    categoryList.innerHTML = "";
+
+    let hasChanges = false;
 
     categories.forEach((category, index) => {
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
-        // Rubrik för kategori
+
         const title = document.createElement("h3");
         title.textContent = category.name;
         title.contentEditable = true;
         title.onblur = () => {
-            categories[index].name = title.textContent;
+            if (categories[index].name !== title.textContent) {
+                categories[index].name = title.textContent;
+                hasChanges = true;
+            }
         };
 
         // Färgval
@@ -136,8 +141,10 @@ const renderCategories = async () => {
         colorPicker.type = "color";
         colorPicker.value = category.color || "#f9f9f9";
         colorPicker.onchange = () => {
-            categories[index].color = colorPicker.value;
-            renderCategories();
+            if (categories[index].color !== colorPicker.value) {
+                categories[index].color = colorPicker.value;
+                hasChanges = true;
+            }
         };
 
         // Val av inkomst eller utgift
@@ -150,11 +157,12 @@ const renderCategories = async () => {
             typeSelect.appendChild(option);
         });
         typeSelect.onchange = () => {
-            categories[index].type = typeSelect.value;
-            calculateTotals();
+            if (categories[index].type !== typeSelect.value) {
+                categories[index].type = typeSelect.value;
+                hasChanges = true;
+            }
         };
 
-        // Rubriker för "Förmodad" och "Faktisk"
         const headers = document.createElement("div");
         headers.classList.add("headers");
 
@@ -167,7 +175,6 @@ const renderCategories = async () => {
 
         headers.append(nameHeader, expectedHeader, actualHeader);
 
-        // Lista för objekt
         const itemList = document.createElement("ul");
 
         category.items.forEach((item, itemIndex) => {
@@ -178,7 +185,10 @@ const renderCategories = async () => {
             itemName.value = item.name;
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
-                categories[index].items[itemIndex].name = itemName.value;
+                if (categories[index].items[itemIndex].name !== itemName.value) {
+                    categories[index].items[itemIndex].name = itemName.value;
+                    hasChanges = true; 
+                }
             };
 
             const itemExpected = document.createElement("input");
@@ -186,8 +196,11 @@ const renderCategories = async () => {
             itemExpected.value = item.expected;
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
-                categories[index].items[itemIndex].expected = itemExpected.value;
-                calculateTotals();
+                const newValue = parseFloat(itemExpected.value);
+                if (categories[index].items[itemIndex].expected !== newValue) {
+                    categories[index].items[itemIndex].expected = newValue;
+                    hasChanges = true; 
+                }
             };
 
             const itemActual = document.createElement("input");
@@ -195,29 +208,32 @@ const renderCategories = async () => {
             itemActual.value = item.actual;
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
-                categories[index].items[itemIndex].actual = itemActual.value;
-                calculateTotals();
+                const newValue = parseFloat(itemActual.value);
+                if (categories[index].items[itemIndex].actual !== newValue) {
+                    categories[index].items[itemIndex].actual = newValue;
+                    hasChanges = true; 
+                }
             };
 
             const deleteItemButton = document.createElement("button");
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
-                renderCategories();
-                calculateTotals();
+                hasChanges = true; 
+                renderCategories(); 
             };
 
             itemEl.append(itemName, itemExpected, itemActual, deleteItemButton);
             itemList.appendChild(itemEl);
         });
 
-        // Lägg till ny rad
         const addItemButton = document.createElement("button");
         addItemButton.textContent = "Lägg till rad";
         addItemButton.style.display = "block";
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
-            renderCategories();
+            hasChanges = true; 
+            renderCategories(); 
         };
 
         // Ta bort kategori
@@ -225,16 +241,22 @@ const renderCategories = async () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
-            renderCategories();
-            calculateTotals();
+            hasChanges = true;
+            renderCategories(); 
         };
 
         categoryEl.append(title, colorPicker, typeSelect, headers, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 
-    calculateTotals(); // Beräkna totalsummor efter att kategorierna har uppdaterats
+    // Om några förändringar har skett, beräkna totalsummor
+    if (hasChanges) {
+        document.addEventListener("DOMContentLoaded", () => {
+            calculateTotals();
+        });
+    }
 };
+
 
 // Lägg till kategori
 addCategoryButton.addEventListener("click", async () => {
