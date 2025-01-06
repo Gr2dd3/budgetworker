@@ -19,12 +19,14 @@ const db = getFirestore(app);
 
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
-const totalExpectedEl = document.getElementById("total-expected");
-const totalActualEl = document.getElementById("total-actual");
-const totalBudgetExpectedIncomeEl = document.getElementById("total-budget-expected-income");
-const totalBudgetExpectedExpenseEl = document.getElementById("total-budget-expected-expence");
-const totalBudgetActualIncomeEl = document.getElementById("total-budget-actual-income");
-const totalBudgetActualExpenseEl = document.getElementById("total-budget-actual-expence");
+document.addEventListener("DOMContentLoaded", () => {
+    const totalExpectedEl = document.getElementById("total-expected");
+    const totalActualEl = document.getElementById("total-actual");
+    const totalBudgetExpectedIncomeEl = document.getElementById("total-budget-expected-income");
+    const totalBudgetExpectedExpenseEl = document.getElementById("total-budget-expected-expense");
+    const totalBudgetActualIncomeEl = document.getElementById("total-budget-actual-income");
+    const totalBudgetActualExpenseEl = document.getElementById("total-budget-actual-expense");
+});
 
 let categories = []; // För att lagra kategorier
 
@@ -84,8 +86,10 @@ const calculateTotals = () => {
 
 // Uppdatera UI
 const updateUI = (totalExpectedIncome, totalExpectedExpense, totalExpected, totalActualIncome, totalActualExpense, totalActual) => {
-    // Kolla att alla element finns
-    if (totalBudgetExpectedIncomeEl && totalBudgetExpectedExpenseEl && totalBudgetActualIncomeEl && totalBudgetActualExpenseEl) {
+    // Kontrollera om alla element finns innan du försöker uppdatera dem
+    const elementsExist = totalBudgetExpectedIncomeEl && totalBudgetExpectedExpenseEl && totalBudgetActualIncomeEl && totalBudgetActualExpenseEl;
+    
+    if (elementsExist) {
         totalBudgetExpectedIncomeEl.textContent = `Inkomst: ${totalExpectedIncome.toFixed(2)} kr`;
         totalBudgetExpectedExpenseEl.textContent = `Utgift: ${totalExpectedExpense.toFixed(2)} kr`;
         totalExpectedEl.textContent = `Total budget: ${totalExpected.toFixed(2)} kr`;
@@ -94,9 +98,15 @@ const updateUI = (totalExpectedIncome, totalExpectedExpense, totalExpected, tota
         totalBudgetActualExpenseEl.textContent = `Utgift: ${totalActualExpense.toFixed(2)} kr`;
         totalActualEl.textContent = `Total budget: ${totalActual.toFixed(2)} kr`;
     } else {
-        console.error("Ett eller flera HTML-element har inte hittats!");
+        console.error("Ett eller flera HTML-element har inte hittats!", {
+            totalBudgetExpectedIncomeEl,
+            totalBudgetExpectedExpenseEl,
+            totalBudgetActualIncomeEl,
+            totalBudgetActualExpenseEl
+        });
     }
 };
+
 
 // Kör när DOM är redo
 document.addEventListener('DOMContentLoaded', () => {
