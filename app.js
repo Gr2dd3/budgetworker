@@ -1,7 +1,15 @@
+
+/*Tillfällig inlogg*/
 const validCredentials = { 
+    username: "1", 
+    passwordHash: "c4ca4238a0b923820dcc509a6f75849b" /**lösen nu: 1 */
+};
+console.log("Förväntad hash för 1: " + CryptoJS.MD5("1").toString());
+
+/*const validCredentials = { 
     username: "Gradin2025", 
     passwordHash: "3af6f058eab3ac8f451704880d405ad9"
-};
+};*/
 
 const loginScreen = document.getElementById("login-screen");
 const appScreen = document.getElementById("app");
@@ -10,22 +18,50 @@ const loginButton = document.getElementById("login-button");
 
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
-const totalBudgetEl = document.getElementById("total-budget");
+const totalExpectedEl = document.getElementById("total-expected");
+const totalActualEl = document.getElementById("total-actual");
+const totalBudgetExpectedEl = document.getElementById("total-budget-expected");
+const totalBudgetActualEl = document.getElementById("total-budget-actual");
 
 let categories = JSON.parse(localStorage.getItem("budgetCategories")) || [];
 
+// Spara kategorier i localStorage
 const saveCategories = () => {
     localStorage.setItem("budgetCategories", JSON.stringify(categories));
 };
 
-const calculateTotalBudget = () => {
-    const total = categories.reduce((sum, category) => {
-        const categoryTotal = category.items.reduce((catSum, item) => catSum + parseFloat(item.amount || 0), 0);
-        return sum + (category.type === "income" ? categoryTotal : -categoryTotal);
-    }, 0);
-    totalBudgetEl.textContent = total.toFixed(2);
+// Beräkna totalsummor
+const calculateTotals = () => {
+    let totalExpectedIncome = 0;
+    let totalExpectedExpense = 0;
+    let totalActualIncome = 0;
+    let totalActualExpense = 0;
+
+    categories.forEach(category => {
+        category.items.forEach(item => {
+            const expected = parseFloat(item.expected) || 0;
+            const actual = parseFloat(item.actual) || 0;
+
+            if (category.type === "income") {
+                totalExpectedIncome += expected;
+                totalActualIncome += actual;
+            } else {
+                totalExpectedExpense += expected;
+                totalActualExpense += actual;
+            }
+        });
+    });
+
+    const totalExpected = totalExpectedIncome - totalExpectedExpense;
+    const totalActual = totalActualIncome - totalActualExpense;
+
+    totalExpectedEl.textContent = `Total budget (förmodad): ${totalExpected.toFixed(2)} kr`;
+    totalActualEl.textContent = `Total budget (faktisk): ${totalActual.toFixed(2)} kr`;
+    totalBudgetExpectedEl.textContent = `Inkomst (förmodad): ${totalExpectedIncome.toFixed(2)}, Utgift (förmodad): ${totalExpectedExpense.toFixed(2)} kr`;
+    totalBudgetActualEl.textContent = `Inkomst (faktisk): ${totalActualIncome.toFixed(2)}, Utgift (faktisk): ${totalActualExpense.toFixed(2)} kr`;
 };
 
+// Rendera kategorier
 const renderCategories = () => {
     categoryList.innerHTML = "";
     categories.forEach((category, index) => {
@@ -33,6 +69,7 @@ const renderCategories = () => {
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
+        // Rubrik för kategori
         const title = document.createElement("h3");
         title.textContent = category.name;
         title.contentEditable = true;
@@ -41,20 +78,7 @@ const renderCategories = () => {
             saveCategories();
         };
 
-        const typeSelect = document.createElement("select");
-        ["income", "expense"].forEach(type => {
-            const option = document.createElement("option");
-            option.value = type;
-            option.textContent = type === "income" ? "Income" : "Expense";
-            option.selected = category.type === type;
-            typeSelect.appendChild(option);
-        });
-        typeSelect.onchange = () => {
-            categories[index].type = typeSelect.value;
-            saveCategories();
-            calculateTotalBudget();
-        };
-
+        // Färgval
         const colorPicker = document.createElement("input");
         colorPicker.type = "color";
         colorPicker.value = category.color || "#f9f9f9";
@@ -64,6 +88,35 @@ const renderCategories = () => {
             renderCategories();
         };
 
+        // Val av inkomst eller utgift
+        const typeSelect = document.createElement("select");
+        ["income", "expense"].forEach(type => {
+            const option = document.createElement("option");
+            option.value = type;
+            option.textContent = type === "income" ? "Inkomst" : "Utgift";
+            option.selected = category.type === type;
+            typeSelect.appendChild(option);
+        });
+        typeSelect.onchange = () => {
+            categories[index].type = typeSelect.value;
+            saveCategories();
+            calculateTotals();
+        };
+
+        // Rubriker för "Förmodad" och "Faktisk"
+        const headers = document.createElement("div");
+        headers.classList.add("headers");
+
+        const nameHeader = document.createElement("span");
+        nameHeader.textContent = "Namn";
+        const expectedHeader = document.createElement("span");
+        expectedHeader.textContent = "Förmodad";
+        const actualHeader = document.createElement("span");
+        actualHeader.textContent = "Faktisk";
+
+        headers.append(nameHeader, expectedHeader, actualHeader);
+
+        // Lista för objekt
         const itemList = document.createElement("ul");
 
         category.items.forEach((item, itemIndex) => {
@@ -72,77 +125,94 @@ const renderCategories = () => {
 
             const itemName = document.createElement("input");
             itemName.value = item.name;
+            itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
                 saveCategories();
             };
 
-            const itemAmount = document.createElement("input");
-            itemAmount.type = "number";
-            itemAmount.value = item.amount;
-            itemAmount.onchange = () => {
-                categories[index].items[itemIndex].amount = itemAmount.value;
+            const itemExpected = document.createElement("input");
+            itemExpected.type = "number";
+            itemExpected.value = item.expected;
+            itemExpected.placeholder = "Förmodad";
+            itemExpected.onchange = () => {
+                categories[index].items[itemIndex].expected = itemExpected.value;
                 saveCategories();
-                calculateTotalBudget();
+                calculateTotals();
+            };
+
+            const itemActual = document.createElement("input");
+            itemActual.type = "number";
+            itemActual.value = item.actual;
+            itemActual.placeholder = "Faktisk";
+            itemActual.onchange = () => {
+                categories[index].items[itemIndex].actual = itemActual.value;
+                saveCategories();
+                calculateTotals();
             };
 
             const deleteItemButton = document.createElement("button");
-            deleteItemButton.textContent = "Delete";
+            deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
                 categories[index].items.splice(itemIndex, 1);
                 saveCategories();
                 renderCategories();
-                calculateTotalBudget();
+                calculateTotals();
             };
 
-            itemEl.append(itemName, itemAmount, deleteItemButton);
+            itemEl.append(itemName, itemExpected, itemActual, deleteItemButton);
             itemList.appendChild(itemEl);
         });
 
+        // Lägg till ny rad
         const addItemButton = document.createElement("button");
-        addItemButton.textContent = "Add Item";
-        addItemButton.style.marginRight = "1rem";
+        addItemButton.textContent = "Lägg till rad";
+        addItemButton.style.display = "block";
         addItemButton.onclick = () => {
-            categories[index].items.push({ name: "", amount: 0 });
+            categories[index].items.push({ name: "", expected: 0, actual: 0 });
             saveCategories();
             renderCategories();
         };
 
+        // Ta bort kategori
         const deleteCategoryButton = document.createElement("button");
-        deleteCategoryButton.textContent = "Delete Category";
+        deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.onclick = () => {
             categories.splice(index, 1);
             saveCategories();
             renderCategories();
-            calculateTotalBudget();
+            calculateTotals();
         };
 
-        categoryEl.append(title, typeSelect, colorPicker, itemList, addItemButton, deleteCategoryButton);
+        categoryEl.append(title, colorPicker, typeSelect, headers, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 
-    calculateTotalBudget();
+    calculateTotals();
 };
 
-const md5 = (string) => {
-    return CryptoJS.MD5(string).toString();
-};
-
+// Inloggning
 loginButton.addEventListener("click", () => {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    if (username === validCredentials.username && md5(password) === validCredentials.passwordHash) {
+    if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
         loginScreen.classList.add("hidden");
         appScreen.classList.remove("hidden");
         renderCategories();
     } else {
-        errorMessage.textContent = "Invalid username or password.";
+        errorMessage.textContent = "Fel användarnamn eller lösenord.";
     }
 });
 
+// Lägg till kategori
 addCategoryButton.addEventListener("click", () => {
-    categories.push({ name: "New Category", type: "income", color: "#f9f9f9", items: [] });
+    categories.push({
+        name: "Ny kategori",
+        type: "expense",
+        color: "#f9f9f9",
+        items: []
+    });
     saveCategories();
     renderCategories();
 });

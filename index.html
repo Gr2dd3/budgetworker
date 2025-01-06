@@ -10,21 +10,29 @@
 <body>
     <div id="login-screen">
         <h1>Login</h1>
-        <input type="text" id="username" placeholder="Username" autocomplete="username">
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-        <button id="login-button">Login</button>
+        <input type="text" id="username" placeholder="Användarnamn" autocomplete="username">
+        <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password">
+        <button id="login-button">Logga in</button>
         <p id="error-message"></p>
     </div>
 
     <div id="app" class="hidden">
-        <h1>Budget App</h1>
+        <h2>Budget</h2>
         <div id="budget">
-            <h2>Categories</h2>
             <ul id="category-list"></ul>
-            <button id="add-category">Add Category</button>
+            <button id="add-category">Lägg till kategori</button>
         </div>
         <div id="totals">
-            <h3>Total Budget: <span id="total-budget">0</span></h3>
+            <div class="probTotal">
+                <h3>Förmodad budget:</h3>
+                <h3 id="total-budget-expected">Inkomst (förmodad): 0, Utgift (förmodad): 0</h3>
+                <h3 id="total-expected">Total budget (förmodad): 0</h3>
+            </div>
+            <div class="actuTotal">
+                <h3>Faktisk budget:</h3>
+                <h3 id="total-actual">Total budget (faktisk): 0</h3>
+                <h3 id="total-budget-actual">Inkomst (faktisk): 0, Utgift (faktisk): 0</h3>
+            </div>
         </div>
     </div>
 
