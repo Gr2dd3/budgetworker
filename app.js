@@ -89,8 +89,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         categories.forEach(category => {
             category.items.forEach(item => {
-                const expected = parseFloat(item.expected) || 0;
-                const actual = parseFloat(item.actual) || 0;
+                const expected = isNaN(parseFloat(item.expected)) ? 0 : parseFloat(item.expected);
+                const actual = isNaN(parseFloat(item.expected)) ? 0 : parseFloat(item.actual);
 
                 if (category.type === "income") {
                     totalExpectedIncome += expected;
