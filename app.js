@@ -12,64 +12,42 @@ const firebaseConfig = {
     measurementId: "G-94E36FGRMZ"
 };
 
-/*const calculateTotals = () => {
-    let expectedTotal = 0;
-    let actualTotal = 0;
+// Förenklad calculateTotals-funktion
+const calculateTotals = () => {
+    let expectedIncome = 0;
+    let expectedExpense = 0;
+    let actualIncome = 0;
+    let actualExpense = 0;
 
     categories.forEach(category => {
         category.items.forEach(item => {
             if (category.type === "income") {
-                expectedTotal += item.expected || 0;
-                actualTotal += item.actual || 0;
+                expectedIncome += item.expected || 0;
+                actualIncome += item.actual || 0;
             } else if (category.type === "expense") {
-                expectedTotal -= item.expected || 0;
-                actualTotal -= item.actual || 0;
+                expectedExpense += item.expected || 0;
+                actualExpense += item.actual || 0;
             }
         });
-    });*/
+    });
 
-    const calculateTotals = () => {
-        let expectedIncome = 0;
-        let expectedExpense = 0;
-        let actualIncome = 0;
-        let actualExpense = 0;
-    
-        categories.forEach(category => {
-            category.items.forEach(item => {
-                if (category.type === "income") {
-                    expectedIncome += item.expected || 0;
-                    actualIncome += item.actual || 0;
-                } else if (category.type === "expense") {
-                    expectedExpense += item.expected || 0;
-                    actualExpense += item.actual || 0;
-                }
-            });
-        });
-    
-        document.getElementById("total-budget-expected-income").textContent = `Inkomst: ${expectedIncome} kr`;
-        document.getElementById("total-budget-expected-expense").textContent = `Utgift: ${expectedExpense} kr`;
-        document.getElementById("total-expected").textContent = `Total budget: ${expectedIncome - expectedExpense} kr`;
-        document.getElementById("total-budget-actual-income").textContent = `Inkomst: ${actualIncome} kr`;
-        document.getElementById("total-budget-actual-expense").textContent = `Utgift: ${actualExpense} kr`;
-        document.getElementById("total-actual").textContent = `Total budget: ${actualIncome - actualExpense} kr`;
-    };
-    
-
-    // Uppdatera DOM
-    const setTextContent = (id, text) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = text;
-        } else {
-            console.error(`Element med id "${id}" hittades inte!`);
-        }
-    };
-
-    setTextContent("total-expected", `Total budget: ${expectedTotal}`);
-    setTextContent("total-actual", `Total budget: ${actualTotal}`);
+    setTextContent("total-budget-expected-income", `Förmodad inkomst: ${expectedIncome} kr`);
+    setTextContent("total-budget-expected-expense", `Förmodad utgift: ${expectedExpense} kr`);
+    setTextContent("total-expected", `Förmodad budget: ${expectedIncome - expectedExpense} kr`);
+    setTextContent("total-budget-actual-income", `Faktisk inkomst: ${actualIncome} kr`);
+    setTextContent("total-budget-actual-expense", `Faktisk utgift: ${actualExpense} kr`);
+    setTextContent("total-actual", `Faktisk budget: ${actualIncome - actualExpense} kr`);
 };
 
-
+// Uppdatera DOM
+const setTextContent = (id, text) => {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = text;
+    } else {
+        console.error(`Element med id "${id}" hittades inte!`);
+    }
+};
 
 // Initiera Firebase
 const app = initializeApp(firebaseConfig);
@@ -106,30 +84,6 @@ const renderCategories = () => {
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
-        // Gör kategorin dragbar
-        categoryEl.draggable = true;
-        console.log(`Category ${index} draggable:`, categoryEl.draggable);
-        categoryEl.ondragstart = (event) => {
-            console.log("Dragging category:", index);
-            event.dataTransfer.setData("categoryIndex", index);
-        };
-
-        categoryEl.ondragover = (event) => {
-            event.preventDefault();
-        };
-
-        categoryEl.ondrop = (event) => {
-            event.preventDefault();
-            const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
-            if (draggedCategoryIndex !== null) {
-                const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
-                categories.splice(index, 0, draggedCategory);
-                renderCategories();
-                calculateTotals();
-                saveCategoriesToFirestore();
-            }
-        };        
-
         const title = document.createElement("h3");
         title.textContent = category.name;
         title.contentEditable = true;
@@ -142,32 +96,6 @@ const renderCategories = () => {
         category.items.forEach((item, itemIndex) => {
             const itemEl = document.createElement("li");
             itemEl.classList.add("item");
-
-            // Gör item dragbart
-            itemEl.draggable = true;
-            console.log(`Item ${itemIndex} draggable:`, itemEl.draggable);
-            itemEl.ondragstart = (event) => {
-                event.dataTransfer.setData("itemIndex", itemIndex);
-                event.dataTransfer.setData("categoryIndex", index);
-            };
-
-            itemEl.ondragover = (event) => {
-                event.preventDefault();
-            };
-
-            itemEl.ondrop = (event) => {
-                event.preventDefault();
-                const draggedItemIndex = parseInt(event.dataTransfer.getData("itemIndex"));
-                const draggedCategoryIndex = parseInt(event.dataTransfer.getData("categoryIndex"));
-
-                if (draggedCategoryIndex === index) {
-                    const draggedItem = categories[index].items.splice(draggedItemIndex, 1)[0];
-                    categories[index].items.splice(itemIndex, 0, draggedItem);
-                    renderCategories();
-                    calculateTotals();
-                    saveCategoriesToFirestore();
-                }
-            };
 
             const itemName = document.createElement("input");
             itemName.value = item.name;
@@ -242,16 +170,15 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         console.error("Add category button not found!");
     }
-});
 
-document.addEventListener("dragstart", (event) => {
-    console.log("Global: Dragging started", event.target);
-});
-
-document.addEventListener("dragover", (event) => {
-    console.log("Global: Dragging over", event.target);
-});
-
-document.addEventListener("drop", (event) => {
-    console.log("Global: Dropped", event.target);
+    const saveButton = document.getElementById("save-button");
+    if (saveButton) {
+        saveButton.addEventListener("click", () => {
+            renderCategories();
+            calculateTotals();
+            saveCategoriesToFirestore();
+        });
+    } else {
+        console.error("Save button not found!");
+    }
 });
