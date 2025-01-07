@@ -133,13 +133,12 @@ const renderCategories = async () => {
 
         categoryEl.ondrop = (event) => {
             event.preventDefault();
-            const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
-            if (draggedCategoryIndex !== index) {
-                const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
-                categories.splice(index, 0, draggedCategory);
-                renderCategories(); // Rendera om kategorier
-            }
+            const draggedCategoryIndex = parseInt(event.dataTransfer.getData("categoryIndex"));
+            const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
+            categories.splice(index, 0, draggedCategory);
+            renderCategories();
         };
+        
 
         const title = document.createElement("h3");
         title.textContent = category.name;
@@ -206,15 +205,15 @@ const renderCategories = async () => {
 
             itemEl.ondrop = (event) => {
                 event.preventDefault();
-                const draggedItemIndex = event.dataTransfer.getData("itemIndex");
-                const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
-
-                if (draggedCategoryIndex === index && draggedItemIndex !== itemIndex) {
-                    const draggedItem = category.items.splice(draggedItemIndex, 1)[0];
-                    category.items.splice(itemIndex, 0, draggedItem);
-                    renderCategories(); // Rendera om kategorier och items
+                const draggedItemIndex = parseInt(event.dataTransfer.getData("itemIndex"));
+                const draggedCategoryIndex = parseInt(event.dataTransfer.getData("categoryIndex"));
+            
+                if (draggedCategoryIndex === index) {
+                    const draggedItem = categories[index].items.splice(draggedItemIndex, 1)[0];
+                    categories[index].items.splice(itemIndex, 0, draggedItem);
+                    renderCategories();
                 }
-            };
+            };            
 
             const itemName = document.createElement("input");
             itemName.value = item.name;
