@@ -13,23 +13,22 @@ const firebaseConfig = {
 };
 
 const calculateTotals = () => {
-    let expectedIncome = 0;
-    let expectedExpense = 0;
-    let actualIncome = 0;
-    let actualExpense = 0;
+    let expectedTotal = 0;
+    let actualTotal = 0;
 
     categories.forEach(category => {
         category.items.forEach(item => {
             if (category.type === "income") {
-                expectedIncome += item.expected || 0;
-                actualIncome += item.actual || 0;
+                expectedTotal += item.expected || 0;
+                actualTotal += item.actual || 0;
             } else if (category.type === "expense") {
-                expectedExpense += item.expected || 0;
-                actualExpense += item.actual || 0;
+                expectedTotal -= item.expected || 0;
+                actualTotal -= item.actual || 0;
             }
         });
     });
 
+    // Uppdatera DOM
     const setTextContent = (id, text) => {
         const element = document.getElementById(id);
         if (element) {
@@ -39,12 +38,8 @@ const calculateTotals = () => {
         }
     };
 
-    setTextContent("total-budget-expected-income", `Inkomst: ${expectedIncome}`);
-    setTextContent("total-budget-expected-expense", `Utgift: ${expectedExpense}`);
-    setTextContent("total-expected", `Total budget: ${expectedIncome - expectedExpense}`);
-    setTextContent("total-budget-actual-income", `Inkomst: ${actualIncome}`);
-    setTextContent("total-budget-actual-expense", `Utgift: ${actualExpense}`);
-    setTextContent("total-actual", `Total budget: ${actualIncome - actualExpense}`);
+    setTextContent("total-expected", `Total budget: ${expectedTotal}`);
+    setTextContent("total-actual", `Total budget: ${actualTotal}`);
 };
 
 
@@ -98,15 +93,15 @@ const renderCategories = () => {
 
         categoryEl.ondrop = (event) => {
             event.preventDefault();
-            console.log("Dropped on category:", index);
-            const draggedCategoryIndex = parseInt(event.dataTransfer.getData("categoryIndex"));
-            console.log("Dragged category index:", draggedCategoryIndex);
-            const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
-            categories.splice(index, 0, draggedCategory);
-            renderCategories();
-            calculateTotals();
-            saveCategoriesToFirestore();
-        };
+            const draggedCategoryIndex = event.dataTransfer.getData("categoryIndex");
+            if (draggedCategoryIndex !== null) {
+                const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
+                categories.splice(index, 0, draggedCategory);
+                renderCategories();
+                calculateTotals();
+                saveCategoriesToFirestore();
+            }
+        };        
 
         const title = document.createElement("h3");
         title.textContent = category.name;
