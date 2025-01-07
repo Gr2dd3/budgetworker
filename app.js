@@ -12,7 +12,7 @@ const firebaseConfig = {
     measurementId: "G-94E36FGRMZ"
 };
 
-const calculateTotals = () => {
+/*const calculateTotals = () => {
     let expectedTotal = 0;
     let actualTotal = 0;
 
@@ -26,7 +26,34 @@ const calculateTotals = () => {
                 actualTotal -= item.actual || 0;
             }
         });
-    });
+    });*/
+
+    const calculateTotals = () => {
+        let expectedIncome = 0;
+        let expectedExpense = 0;
+        let actualIncome = 0;
+        let actualExpense = 0;
+    
+        categories.forEach(category => {
+            category.items.forEach(item => {
+                if (category.type === "income") {
+                    expectedIncome += item.expected || 0;
+                    actualIncome += item.actual || 0;
+                } else if (category.type === "expense") {
+                    expectedExpense += item.expected || 0;
+                    actualExpense += item.actual || 0;
+                }
+            });
+        });
+    
+        document.getElementById("total-budget-expected-income").textContent = `Inkomst: ${expectedIncome} kr`;
+        document.getElementById("total-budget-expected-expense").textContent = `Utgift: ${expectedExpense} kr`;
+        document.getElementById("total-expected").textContent = `Total budget: ${expectedIncome - expectedExpense} kr`;
+        document.getElementById("total-budget-actual-income").textContent = `Inkomst: ${actualIncome} kr`;
+        document.getElementById("total-budget-actual-expense").textContent = `Utgift: ${actualExpense} kr`;
+        document.getElementById("total-actual").textContent = `Total budget: ${actualIncome - actualExpense} kr`;
+    };
+    
 
     // Uppdatera DOM
     const setTextContent = (id, text) => {
