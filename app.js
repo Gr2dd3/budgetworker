@@ -292,5 +292,14 @@ addCategoryButton.addEventListener("click", () => {
     renderCategories();
 });
 
-// Ladda data
-loadCategories();
+document.addEventListener("DOMContentLoaded", () => {
+    const loginButton = document.getElementById("login-button");
+    if (loginButton) {
+        loginButton.addEventListener("click", () => {
+            console.log("Login button clicked!");
+            loadCategories();
+        });
+    } else {
+        console.error("Login button not found!");
+    }
+});
