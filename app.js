@@ -30,14 +30,23 @@ const calculateTotals = () => {
         });
     });
 
-    // Uppdatera DOM
-    document.getElementById("total-budget-expected-income").textContent = `Inkomst: ${expectedIncome}`;
-    document.getElementById("total-budget-expected-expense").textContent = `Utgift: ${expectedExpense}`;
-    document.getElementById("total-expected").textContent = `Total budget: ${expectedIncome - expectedExpense}`;
-    document.getElementById("total-budget-actual-income").textContent = `Inkomst: ${actualIncome}`;
-    document.getElementById("total-budget-actual-expense").textContent = `Utgift: ${actualExpense}`;
-    document.getElementById("total-actual").textContent = `Total budget: ${actualIncome - actualExpense}`;
+    const setTextContent = (id, text) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = text;
+        } else {
+            console.error(`Element med id "${id}" hittades inte!`);
+        }
+    };
+
+    setTextContent("total-budget-expected-income", `Inkomst: ${expectedIncome}`);
+    setTextContent("total-budget-expected-expense", `Utgift: ${expectedExpense}`);
+    setTextContent("total-expected", `Total budget: ${expectedIncome - expectedExpense}`);
+    setTextContent("total-budget-actual-income", `Inkomst: ${actualIncome}`);
+    setTextContent("total-budget-actual-expense", `Utgift: ${actualExpense}`);
+    setTextContent("total-actual", `Total budget: ${actualIncome - actualExpense}`);
 };
+
 
 
 // Initiera Firebase
@@ -77,6 +86,7 @@ const renderCategories = () => {
 
         // Gör kategorin dragbar
         categoryEl.draggable = true;
+        console.log(`Category ${index} draggable:`, categoryEl.draggable);
         categoryEl.ondragstart = (event) => {
             console.log("Dragging category:", index);
             event.dataTransfer.setData("categoryIndex", index);
@@ -113,6 +123,7 @@ const renderCategories = () => {
 
             // Gör item dragbart
             itemEl.draggable = true;
+            console.log(`Item ${itemIndex} draggable:`, itemEl.draggable);
             itemEl.ondragstart = (event) => {
                 event.dataTransfer.setData("itemIndex", itemIndex);
                 event.dataTransfer.setData("categoryIndex", index);
@@ -187,18 +198,19 @@ const loadCategories = async () => {
     calculateTotals();
 };
 
-// Initiera efter DOM laddats
 document.addEventListener("DOMContentLoaded", () => {
     const loginButton = document.getElementById("login-button");
     if (loginButton) {
-        loginButton.addEventListener("click", () => {
+        loginButton.addEventListener("click", async () => {
             console.log("Login button clicked!");
-            loadCategories();
+            await loadCategories();
+            calculateTotals();
         });
     } else {
         console.error("Login button not found!");
     }
 
+    const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
         addCategoryButton.addEventListener("click", () => {
             categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [] });
@@ -208,4 +220,16 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         console.error("Add category button not found!");
     }
+});
+
+document.addEventListener("dragstart", (event) => {
+    console.log("Global: Dragging started", event.target);
+});
+
+document.addEventListener("dragover", (event) => {
+    console.log("Global: Dragging over", event.target);
+});
+
+document.addEventListener("drop", (event) => {
+    console.log("Global: Dropped", event.target);
 });
