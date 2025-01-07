@@ -12,6 +12,34 @@ const firebaseConfig = {
     measurementId: "G-94E36FGRMZ"
 };
 
+const calculateTotals = () => {
+    let expectedIncome = 0;
+    let expectedExpense = 0;
+    let actualIncome = 0;
+    let actualExpense = 0;
+
+    categories.forEach(category => {
+        category.items.forEach(item => {
+            if (category.type === "income") {
+                expectedIncome += item.expected || 0;
+                actualIncome += item.actual || 0;
+            } else if (category.type === "expense") {
+                expectedExpense += item.expected || 0;
+                actualExpense += item.actual || 0;
+            }
+        });
+    });
+
+    // Uppdatera DOM
+    document.getElementById("total-budget-expected-income").textContent = `Inkomst: ${expectedIncome}`;
+    document.getElementById("total-budget-expected-expense").textContent = `Utgift: ${expectedExpense}`;
+    document.getElementById("total-expected").textContent = `Total budget: ${expectedIncome - expectedExpense}`;
+    document.getElementById("total-budget-actual-income").textContent = `Inkomst: ${actualIncome}`;
+    document.getElementById("total-budget-actual-expense").textContent = `Utgift: ${actualExpense}`;
+    document.getElementById("total-actual").textContent = `Total budget: ${actualIncome - actualExpense}`;
+};
+
+
 // Initiera Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -50,6 +78,7 @@ const renderCategories = () => {
         // Gör kategorin dragbar
         categoryEl.draggable = true;
         categoryEl.ondragstart = (event) => {
+            console.log("Dragging category:", index);
             event.dataTransfer.setData("categoryIndex", index);
         };
 
@@ -59,10 +88,13 @@ const renderCategories = () => {
 
         categoryEl.ondrop = (event) => {
             event.preventDefault();
+            console.log("Dropped on category:", index);
             const draggedCategoryIndex = parseInt(event.dataTransfer.getData("categoryIndex"));
+            console.log("Dragged category index:", draggedCategoryIndex);
             const draggedCategory = categories.splice(draggedCategoryIndex, 1)[0];
             categories.splice(index, 0, draggedCategory);
             renderCategories();
+            calculateTotals();
             saveCategoriesToFirestore();
         };
 
@@ -99,6 +131,7 @@ const renderCategories = () => {
                     const draggedItem = categories[index].items.splice(draggedItemIndex, 1)[0];
                     categories[index].items.splice(itemIndex, 0, draggedItem);
                     renderCategories();
+                    calculateTotals();
                     saveCategoriesToFirestore();
                 }
             };
@@ -138,6 +171,7 @@ const renderCategories = () => {
         addItemButton.onclick = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
             renderCategories();
+            calculateTotals();
             saveCategoriesToFirestore();
         };
 
@@ -150,6 +184,7 @@ const renderCategories = () => {
 const loadCategories = async () => {
     categories = await fetchCategoriesFromFirestore();
     renderCategories();
+    calculateTotals();
 };
 
 // Initiera efter DOM laddats
@@ -168,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         addCategoryButton.addEventListener("click", () => {
             categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [] });
             renderCategories();
+            calculateTotals();
         });
     } else {
         console.error("Add category button not found!");
