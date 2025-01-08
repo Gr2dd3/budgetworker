@@ -21,8 +21,20 @@ const db = getFirestore(app);
 const fetchCategoriesFromFirestore = async () => {
     const categoriesCollection = collection(db, "categories");
     const snapshot = await getDocs(categoriesCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            items: data.items.map(item => ({
+                name: item.name || "",
+                expected: parseFloat(item.expected) || 0,
+                actual: parseFloat(item.actual) || 0 
+            }))
+        };
+    });
 };
+
 
 /* Spara alla kategorier i Firestore
 const saveCategoriesToFirestore = async () => {
@@ -52,6 +64,7 @@ const setTextContent = (id, text) => {
 
 // Räkna ut total
 const calculateTotals = () => {
+    console.log("Debugging categories:", JSON.stringify(categories, null, 2));
     let expectedIncome = 0;
     let expectedExpense = 0;
     let actualIncome = 0;
@@ -143,7 +156,8 @@ const renderCategories = () => {
             itemExpected.value = item.expected;
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
-                categories[index].items[itemIndex].expected = parseFloat(itemExpected.value);
+                const value = parseFloat(itemExpected.value) || 0;
+                categories[index].items[itemIndex].expected = value;
             };
 
             // Prisfält faktisk
@@ -152,8 +166,12 @@ const renderCategories = () => {
             itemActual.value = item.actual;
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
-                categories[index].items[itemIndex].actual = parseFloat(itemActual.value);
+                const value = parseFloat(itemActual.value) || 0;
+                categories[index].items[itemIndex].actual = value;
             };
+            /*itemActual.onchange = () => {
+                categories[index].items[itemIndex].actual = parseFloat(itemActual.value);
+            };*/
 
             itemEl.append(itemName, itemExpected, itemActual);
             itemList.appendChild(itemEl);
