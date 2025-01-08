@@ -24,13 +24,19 @@ const fetchCategoriesFromFirestore = async () => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// Spara kategorier i Firestore
+/* Spara alla kategorier i Firestore
 const saveCategoriesToFirestore = async () => {
     await Promise.all(categories.map(async (category) => {
         const categoryDoc = doc(db, "categories", category.id);
         await updateDoc(categoryDoc, { ...category });
     }));
     console.log("Kategorier sparade i Firestore!");
+};*/
+
+// Spara endast ändrade kategorier till Firestore
+const saveCategoryToFirestore = async (category) => {
+    const categoryDoc = doc(db, "categories", category.id);
+    await updateDoc(categoryDoc, { ...category });
 };
 
 
@@ -53,16 +59,20 @@ const calculateTotals = () => {
 
     categories.forEach(category => {
         category.items.forEach(item => {
+            const expected = parseFloat(item.expected) || 0;
+            const actual = parseFloat(item.actual) || 0;
+
             if (category.type === "income") {
-                expectedIncome += item.expected || 0;
-                actualIncome += item.actual || 0;
+                expectedIncome += expected;
+                actualIncome += actual;
             } else if (category.type === "expense") {
-                expectedExpense += item.expected || 0;
-                actualExpense += item.actual || 0;
+                expectedExpense += expected;
+                actualExpense += actual;
             }
         });
     });
 
+    // Uppdatera DOM
     setTextContent("total-budget-expected-income", `Förmodad inkomst: ${expectedIncome} kr`);
     setTextContent("total-budget-expected-expense", `Förmodad utgift: ${expectedExpense} kr`);
     setTextContent("total-expected", `Förmodad budget: ${expectedIncome - expectedExpense} kr`);
@@ -72,12 +82,12 @@ const calculateTotals = () => {
 };
 
 
+
 // För att lagra kategorier
 let categories = []; 
 
 // Rendera kategorier
 const categoryList = document.getElementById("category-list");
-const addCategoryButton = document.getElementById("add-category");
 
 const renderCategories = () => {
     categoryList.innerHTML = "";
@@ -93,8 +103,25 @@ const renderCategories = () => {
         title.textContent = category.name;
         title.contentEditable = true;
         title.onblur = () => {
-            categories[index].name = title.textContent;
+            const newName = title.textContent.trim();
+            if (newName) {
+                categories[index].name = newName;
+            } else {
+                alert("Kategorinamn får inte vara tomt!");
+                title.textContent = categories[index].name;
+            }
         };
+
+        // Välj färg på kategorin
+        const colorInput = document.createElement("input");
+        colorInput.type = "color";
+        colorInput.value = category.color || "#f9f9f9";
+        colorInput.onchange = () => {
+            categories[index].color = colorInput.value;
+            categoryEl.style.backgroundColor = colorInput.value;
+        };
+        categoryEl.appendChild(colorInput);
+
 
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
@@ -149,16 +176,26 @@ const renderCategories = () => {
 
 // Ladda kategorier vid start av app
 const loadCategories = async () => {
-    categories = await fetchCategoriesFromFirestore();
-    renderCategories();
-    calculateTotals();
+    try {
+        categories = await fetchCategoriesFromFirestore();
+        if (!categories.length) {
+            console.log("Inga kategorier hittades.");
+        }
+        renderCategories();
+        calculateTotals();
+    } catch (error) {
+        console.error("Fel vid laddning av kategorier:", error);
+        alert("Kunde inte ladda kategorier. Kontrollera din nätverksanslutning.");
+    }
 };
 
-// Inloggning
+
+// Inloggning (TODO: Byt till firebase Authentication)
 const validCredentials = { 
     username: "Gradin2025", 
     passwordHash: "3af6f058eab3ac8f451704880d405ad9"
 };
+
 document.addEventListener("DOMContentLoaded", () => {
     const loginScreen = document.getElementById("login-screen");
     const appScreen = document.getElementById("app");
@@ -192,13 +229,20 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Add category button not found!");
     }
 
-    // Spara manuellt till firebase med spara knapp
+    // Försök Spara manuellt till firebase med spara knapp
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", () => {
             renderCategories();
             calculateTotals();
-            saveCategoriesToFirestore();
+            try {
+                saveCategoriesToFirestore();
+                console.log("Kategorier sparade i Firestore!");
+            } catch (error) {
+                console.error("Misslyckades att spara kategorier:", error);
+                alert("Kunde inte spara ändringar. Försök igen.");
+            }
+            
         });
     } else {
         console.error("Save button not found!");
