@@ -45,6 +45,7 @@ const saveCategoriesToFirestore = async () => {
     console.log("Kategorier sparade i Firestore!");
 };*/
 
+// FUNKAR DENNA VERKLIGEN FÖR SPARNING???
 // Spara endast ändrade kategorier till Firestore
 const saveCategoryToFirestore = async (category) => {
     const categoryDoc = doc(db, "categories", category.id);
@@ -106,10 +107,21 @@ const renderCategories = () => {
     categoryList.innerHTML = "";
 
     categories.forEach((category, index) => {
-        // Skapa list-item
+        // Skapa kategori list-item
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
+
+            // Välj färg på kategorin
+            const colorInput = document.createElement("input");
+            colorInput.Id ="color-input";
+            colorInput.type = "color";
+            colorInput.value = category.color || "#f9f9f9";
+            colorInput.onchange = () => {
+                categories[index].color = colorInput.value;
+                categoryEl.style.backgroundColor = colorInput.value;
+            };
+            categoryEl.appendChild(colorInput);
 
         // Kategorinamn
         const title = document.createElement("h3");
@@ -124,18 +136,7 @@ const renderCategories = () => {
                 title.textContent = categories[index].name;
             }
         };
-
-        // Välj färg på kategorin
-        const colorInput = document.createElement("input");
-        colorInput.type = "color";
-        colorInput.value = category.color || "#f9f9f9";
-        colorInput.onchange = () => {
-            categories[index].color = colorInput.value;
-            categoryEl.style.backgroundColor = colorInput.value;
-        };
-        categoryEl.appendChild(colorInput);
-
-
+        
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
         category.items.forEach((item, itemIndex) => {
@@ -173,7 +174,15 @@ const renderCategories = () => {
                 categories[index].items[itemIndex].actual = parseFloat(itemActual.value);
             };*/
 
-            itemEl.append(itemName, itemExpected, itemActual);
+            const deleteItemButton = document.createElement("button");
+            deleteItemButton.textContent = "Ta bort";
+            deleteItemButton.onclick = () => {
+                categories[index].items.splice(itemIndex, 1);
+                renderCategories();
+                calculateTotals();
+            };
+
+            itemEl.append(itemName, itemExpected, itemActual, deleteItemButton);
             itemList.appendChild(itemEl);
         });
 
@@ -187,7 +196,16 @@ const renderCategories = () => {
             saveCategoriesToFirestore();
         };
 
-        categoryEl.append(title, itemList, addItemButton);
+        // Ta bort kategori
+        const deleteCategoryButton = document.createElement("button");
+        deleteCategoryButton.textContent = "Ta bort kategori";
+        deleteCategoryButton.onclick = () => {
+            categories.splice(index, 1);
+            renderCategories();
+            calculateTotals();
+        };
+
+        categoryEl.append(title, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };
@@ -250,11 +268,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Försök Spara manuellt till firebase med spara knapp
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
-        saveButton.addEventListener("click", () => {
+        saveButton.addEventListener("click", async () => {
             renderCategories();
             calculateTotals();
             try {
-                saveCategoriesToFirestore();
+                await saveCategoriesToFirestore();
                 console.log("Kategorier sparade i Firestore!");
             } catch (error) {
                 console.error("Misslyckades att spara kategorier:", error);
