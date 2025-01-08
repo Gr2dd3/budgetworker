@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { getFirestore , collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
@@ -217,7 +218,9 @@ const validateCategory = (category) => {
 
 
 // Spara alla kategorier i Firestore
-const saveCategoriesToFirestore = async () => {
+/*const saveCategoriesToFirestore = async () => {
+    console.log("Sparar kategori:", JSON.stringify(category, null, 2));
+
     if (!validateCategory(category)) {
         console.error("Ogiltig kategori:", category);
         return;
@@ -234,7 +237,17 @@ const saveCategoriesToFirestore = async () => {
         });
     }));
     console.log("Kategorier sparade i Firestore!");
-};
+};*/
+
+// Spara kategorier i Firestore (google)
+/*const saveCategoriesToFirestore = async (categories) => {
+    const categoriesCollection = collection(db, "categories");
+    for (const category of categories) {
+        const categoryDoc = doc(db, "categories", category.id);
+        await updateDoc(categoriesCollection, category);
+    }
+    console.log("Kategorier sparade i Firestore!");
+};*/
 
 // FUNKAR DENNA VERKLIGEN FÖR SPARNING???
 // Spara endast ändrade kategorier till Firestore
@@ -256,6 +269,29 @@ const saveCategoriesToFirestore = async () => {
 const validCredentials = { 
     username: "Gradin2025", 
     passwordHash: "3af6f058eab3ac8f451704880d405ad9"
+};
+
+// Spara kategorier till Firestore
+const saveCategoriesToFirestore = async (categories) => {
+    try {
+        const categoriesCollection = collection(db, "categories");
+        
+        for (const category of categories) {
+            if (category.id) {
+                // Uppdatera befintlig kategori
+                const categoryDoc = doc(categoriesCollection, category.id);
+                await updateDoc(categoryDoc, category);
+            } else {
+                // Skapa ny kategori
+                const newCategoryRef = await addDoc(categoriesCollection, category);
+                category.id = newCategoryRef.id; // Tilldela ID till kategorin lokalt
+            }
+        }
+
+        console.log("Kategorier sparade framgångsrikt!");
+    } catch (error) {
+        console.error("Fel vid sparning av kategorier:", error);
+    }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -291,28 +327,20 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Add category button not found!");
     }
 
-    // Kontrollera att kategorier finns
-    if (!categories || !Array.isArray(categories)) {
-        console.error("Categories är inte definierad eller är inte en array.");
-        return;
-    }
-
-    // Försök Spara manuellt till firebase med spara knapp
+    // SPARA KNAPPEN
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", async () => {
             try {
-                renderCategories();
-                calculateTotals();
-                await saveCategoriesToFirestore();
-                console.log("Kategorier sparade i Firestore!");
+                await saveCategoriesToFirestore(categories);
+                alert("Kategorier sparade!");
             } catch (error) {
-                console.error("Misslyckades att spara kategorier:", error);
-                alert("Kunde inte spara ändringar. Försök igen.");
+                console.error("Fel vid sparning:", error);
+                alert("Misslyckades att spara kategorier.");
             }
-            
-        });
+        });    
     } else {
         console.error("Save button not found!");
     }
+
 });
