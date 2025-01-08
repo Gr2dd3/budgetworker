@@ -26,32 +26,14 @@ const fetchCategoriesFromFirestore = async () => {
         return {
             id: doc.id,
             ...data,
-            items: data.items.map(item => ({
+            items: Array.isArray(data.items) ? data.items.map(item => ({
                 name: item.name || "",
                 expected: parseFloat(item.expected) || 0,
-                actual: parseFloat(item.actual) || 0 
-            }))
+                actual: parseFloat(item.actual) || 0
+            })) : []
         };
     });
 };
-
-
-// Spara alla kategorier i Firestore
-const saveCategoriesToFirestore = async () => {
-    await Promise.all(categories.map(async (category) => {
-        const categoryDoc = doc(db, "categories", category.id);
-        await updateDoc(categoryDoc, { ...category });
-    }));
-    console.log("Kategorier sparade i Firestore!");
-};
-
-// FUNKAR DENNA VERKLIGEN FÖR SPARNING???
-// Spara endast ändrade kategorier till Firestore
-/*const saveCategoryToFirestore = async (category) => {
-    const categoryDoc = doc(db, "categories", category.id);
-    await updateDoc(categoryDoc, { ...category });
-};*/
-
 
 // Sätt elementen för uträkning och kolla att de finns innan de körs
 const setTextContent = (id, text) => {
@@ -65,7 +47,6 @@ const setTextContent = (id, text) => {
 
 // Räkna ut total
 const calculateTotals = () => {
-    console.log("Debugging categories:", JSON.stringify(categories, null, 2));
     let expectedIncome = 0;
     let expectedExpense = 0;
     let actualIncome = 0;
@@ -189,11 +170,11 @@ const renderCategories = () => {
         // Lägg till ny item
         const addItemButton = document.createElement("button");
         addItemButton.textContent = "Lägg till rad";
-        addItemButton.onclick = () => {
+        addItemButton.onclick = async () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
             renderCategories();
             calculateTotals();
-            saveCategoriesToFirestore();
+            // saveCategoriesToFirestore();
         };
 
         // Ta bort kategori
@@ -224,6 +205,51 @@ const loadCategories = async () => {
         alert("Kunde inte ladda kategorier. Kontrollera din nätverksanslutning.");
     }
 };
+// Validera att kategorier har allt nödvändigt
+const validateCategory = (category) => {
+    if (!category.name || typeof category.name !== "string") return false;
+    if (!Array.isArray(category.items)) return false;
+    if (category.items.some(item => typeof item.name !== "string" || isNaN(item.expected) || isNaN(item.actual))) {
+        return false;
+    }
+    return true;
+};
+
+
+// Spara alla kategorier i Firestore
+const saveCategoriesToFirestore = async () => {
+    if (!validateCategory(category)) {
+        console.error("Ogiltig kategori:", category);
+        return;
+    }
+    console.log("Sparar kategorier till Firestore:", categories);
+    await Promise.all(categories.map(async (category) => {
+        if (!category.id) {
+            console.error("Kategori saknar ett giltigt ID:", category);
+            return;
+        }
+        const categoryDoc = doc(db, "categories", category.id);
+        await updateDoc(categoryDoc, { ...category }).catch((error) => {
+            console.error(`Misslyckades att spara kategori med ID ${category.id}:`, error);
+        });
+    }));
+    console.log("Kategorier sparade i Firestore!");
+};
+
+// FUNKAR DENNA VERKLIGEN FÖR SPARNING???
+// Spara endast ändrade kategorier till Firestore
+/*const saveCategoryToFirestore = async (category) => {
+    const categoryDoc = doc(db, "categories", category.id);
+    await updateDoc(categoryDoc, { ...category });
+};*/
+
+/*const saveCategoriesToFirestore = async (categories) => {
+    const categoriesCollection = collection(db, "categories");
+    for (const category of categories) {
+        await addDoc(categoriesCollection, category);
+    }
+    console.log("Kategorier sparade i Firestore!");
+};*/
 
 
 // Inloggning (TODO: Byt till firebase Authentication)
@@ -265,13 +291,19 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Add category button not found!");
     }
 
+    // Kontrollera att kategorier finns
+    if (!categories || !Array.isArray(categories)) {
+        console.error("Categories är inte definierad eller är inte en array.");
+        return;
+    }
+
     // Försök Spara manuellt till firebase med spara knapp
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", async () => {
-            renderCategories();
-            calculateTotals();
             try {
+                renderCategories();
+                calculateTotals();
                 await saveCategoriesToFirestore();
                 console.log("Kategorier sparade i Firestore!");
             } catch (error) {
