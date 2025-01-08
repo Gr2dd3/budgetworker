@@ -36,21 +36,21 @@ const fetchCategoriesFromFirestore = async () => {
 };
 
 
-/* Spara alla kategorier i Firestore
+// Spara alla kategorier i Firestore
 const saveCategoriesToFirestore = async () => {
     await Promise.all(categories.map(async (category) => {
         const categoryDoc = doc(db, "categories", category.id);
         await updateDoc(categoryDoc, { ...category });
     }));
     console.log("Kategorier sparade i Firestore!");
-};*/
+};
 
 // FUNKAR DENNA VERKLIGEN FÖR SPARNING???
 // Spara endast ändrade kategorier till Firestore
-const saveCategoryToFirestore = async (category) => {
+/*const saveCategoryToFirestore = async (category) => {
     const categoryDoc = doc(db, "categories", category.id);
     await updateDoc(categoryDoc, { ...category });
-};
+};*/
 
 
 // Sätt elementen för uträkning och kolla att de finns innan de körs
@@ -136,7 +136,7 @@ const renderCategories = () => {
                 title.textContent = categories[index].name;
             }
         };
-        
+
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
         category.items.forEach((item, itemIndex) => {
