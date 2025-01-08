@@ -12,7 +12,39 @@ const firebaseConfig = {
     measurementId: "G-94E36FGRMZ"
 };
 
-// Förenklad calculateTotals-funktion
+// Initiera Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+
+// Hämta kategorier från Firestore
+const fetchCategoriesFromFirestore = async () => {
+    const categoriesCollection = collection(db, "categories");
+    const snapshot = await getDocs(categoriesCollection);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// Spara kategorier i Firestore
+const saveCategoriesToFirestore = async () => {
+    await Promise.all(categories.map(async (category) => {
+        const categoryDoc = doc(db, "categories", category.id);
+        await updateDoc(categoryDoc, { ...category });
+    }));
+    console.log("Kategorier sparade i Firestore!");
+};
+
+
+// Sätt elementen för uträkning och kolla att de finns innan de körs
+const setTextContent = (id, text) => {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = text;
+    } else {
+        console.error(`Element med id "${id}" hittades inte!`);
+    }
+};
+
+// Räkna ut total
 const calculateTotals = () => {
     let expectedIncome = 0;
     let expectedExpense = 0;
@@ -39,94 +71,68 @@ const calculateTotals = () => {
     setTextContent("total-actual", `Faktisk budget: ${actualIncome - actualExpense} kr`);
 };
 
-// Uppdatera DOM
-const setTextContent = (id, text) => {
-    const element = document.getElementById(id);
-    if (element) {
-        element.textContent = text;
-    } else {
-        console.error(`Element med id "${id}" hittades inte!`);
-    }
-};
 
-// Initiera Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
+// För att lagra kategorier
+let categories = []; 
 
+// Rendera kategorier
 const categoryList = document.getElementById("category-list");
 const addCategoryButton = document.getElementById("add-category");
 
-let categories = []; // För att lagra kategorier
-
-// Hämta kategorier från Firestore
-const fetchCategoriesFromFirestore = async () => {
-    const categoriesCollection = collection(db, "categories");
-    const snapshot = await getDocs(categoriesCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-// Spara kategorier i Firestore
-const saveCategoriesToFirestore = async () => {
-    await Promise.all(categories.map(async (category) => {
-        const categoryDoc = doc(db, "categories", category.id);
-        await updateDoc(categoryDoc, { ...category });
-    }));
-    console.log("Kategorier sparade i Firestore!");
-};
-
-// Rendera kategorier
 const renderCategories = () => {
     categoryList.innerHTML = "";
 
     categories.forEach((category, index) => {
+        // Skapa list-item
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
+        // Kategorinamn
         const title = document.createElement("h3");
         title.textContent = category.name;
         title.contentEditable = true;
         title.onblur = () => {
             categories[index].name = title.textContent;
-            saveCategoriesToFirestore();
         };
 
+        //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
         category.items.forEach((item, itemIndex) => {
             const itemEl = document.createElement("li");
             itemEl.classList.add("item");
 
+            // Item namn
             const itemName = document.createElement("input");
             itemName.value = item.name;
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
-                saveCategoriesToFirestore();
             };
 
+            // Prisfält förmodad
             const itemExpected = document.createElement("input");
             itemExpected.type = "number";
             itemExpected.value = item.expected;
             itemExpected.placeholder = "Förmodad";
             itemExpected.onchange = () => {
                 categories[index].items[itemIndex].expected = parseFloat(itemExpected.value);
-                saveCategoriesToFirestore();
             };
 
+            // Prisfält faktisk
             const itemActual = document.createElement("input");
             itemActual.type = "number";
             itemActual.value = item.actual;
             itemActual.placeholder = "Faktisk";
             itemActual.onchange = () => {
                 categories[index].items[itemIndex].actual = parseFloat(itemActual.value);
-                saveCategoriesToFirestore();
             };
 
             itemEl.append(itemName, itemExpected, itemActual);
             itemList.appendChild(itemEl);
         });
 
+        // Lägg till ny item
         const addItemButton = document.createElement("button");
         addItemButton.textContent = "Lägg till rad";
         addItemButton.onclick = () => {
@@ -141,25 +147,40 @@ const renderCategories = () => {
     });
 };
 
-// Ladda kategorier
+// Ladda kategorier vid start av app
 const loadCategories = async () => {
     categories = await fetchCategoriesFromFirestore();
     renderCategories();
     calculateTotals();
 };
 
+// Inloggning
+const validCredentials = { 
+    username: "Gradin2025", 
+    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
+};
 document.addEventListener("DOMContentLoaded", () => {
+    const loginScreen = document.getElementById("login-screen");
+    const appScreen = document.getElementById("app");
+    const errorMessage = document.getElementById("error-message");
     const loginButton = document.getElementById("login-button");
-    if (loginButton) {
-        loginButton.addEventListener("click", async () => {
-            console.log("Login button clicked!");
-            await loadCategories();
-            calculateTotals();
-        });
-    } else {
-        console.error("Login button not found!");
-    }
 
+    loginButton.addEventListener("click", () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+    
+        if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
+            loginScreen.classList.add("hidden");
+            appScreen.classList.remove("hidden");
+            loadCategories();
+            renderCategories();
+            calculateTotals();
+        } else {
+            errorMessage.textContent = "Fel användarnamn eller lösenord.";
+        }
+    });
+
+    // Addera kategorier
     const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
         addCategoryButton.addEventListener("click", () => {
@@ -171,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Add category button not found!");
     }
 
+    // Spara manuellt till firebase med spara knapp
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
         saveButton.addEventListener("click", () => {
