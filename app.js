@@ -187,8 +187,8 @@ const renderCategories = () => {
         categoryEl.appendChild(typeSelect);
 
         // Rubriker för item fälten
-        const spanHeadlines = document.createElement("span");
-        spanHeadlines.id = "span-headlines";
+        const spanHeadlines = document.createElement("div");
+        spanHeadlines.id = "div-headlines";
         const itemNameHeadline = document.createElement("p");
         itemNameHeadline.innerHTML = "Namn";
         const itemExpectedHeadline = document.createElement("p");
@@ -279,9 +279,8 @@ const renderCategories = () => {
             <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
             <strong>Total faktisk:</strong> ${totals.totalActual} kr
         `;
-        categoryEl.appendChild(totalsDiv);
 
-        categoryEl.append(title, spanHeadlines, itemList, addItemButton, deleteCategoryButton);
+        categoryEl.append(title, spanHeadlines, itemList, totalsDiv, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };

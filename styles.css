@@ -71,8 +71,9 @@ input {
     font-size: 14px;
 }
 
-.span-headlines {
+.div-headlines {
     display: flex;
+    flex-direction: row;
     justify-content: space-around;
     margin-right: 60px;
 }
@@ -118,7 +119,7 @@ input {
         input {
             max-width: 21vw; /* Change item width here */
         }
-        .span-headlines {
+        .div-headlines {
             margin-right: 25vw;
         }
         ul {
@@ -133,7 +134,7 @@ input {
         input {
             max-width: 34vw; /* Change item width here */
         }
-        .span-headlines {
+        .div-headlines {
             margin-right: 100px;
         }
         ul {
