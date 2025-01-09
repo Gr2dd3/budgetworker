@@ -158,7 +158,7 @@ const renderCategories = () => {
         // Kategorinamn
         const title = document.createElement("h3");
         title.textContent = category.name;
-        title.style.marginTop = ".5rem";
+        title.id = "category-name";
         title.contentEditable = true;
         title.onblur = () => {
             const newName = title.textContent.trim();

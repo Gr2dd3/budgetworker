@@ -57,6 +57,10 @@ input {
     background-color: #f9f9f9;
 }
 
+#category-name {
+    margin-top: 2rem;
+}
+
 .category h3 {
     margin: 0;
 }
@@ -85,17 +89,12 @@ input {
 }
 
 #item-name {
-    min-width: 2rem;
+    min-width: 4rem;
 }
 
 .item input {
     max-width: auto;
 }
-
-.total-headline {
-    margin-left: .5rem;
-}
-
 
 .probTotal {
     display: block;
@@ -127,9 +126,6 @@ input {
         ul {
             padding: 2%;
         }
-        .total-headline {
-            margin-left: 1.5rem;
-        }
 }
 
 @media (min-width: 660px) {
@@ -141,8 +137,5 @@ input {
         }
         ul {
             padding: 2%;
-        }
-        .total-headline {
-            margin-left: 3.5rem;
         }
 }
