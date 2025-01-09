@@ -257,7 +257,6 @@ const renderCategories = () => {
             <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
             <strong>Total faktisk:</strong> ${totals.totalActual} kr
         `;
-        itemList.after(totalsDiv);
 
         // Lägg till ny item
         const addItemButton = document.createElement("button");
@@ -282,8 +281,15 @@ const renderCategories = () => {
         };
 
 
+        categoryEl.append(
+            title, 
+            spanHeadlines, 
+            itemList, 
+            totalsDiv,
+            addItemButton, 
+            deleteCategoryButton
+        );
 
-        categoryEl.append(title, spanHeadlines, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };
