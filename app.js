@@ -157,8 +157,8 @@ const renderCategories = () => {
 
         // Kategorinamn
         const title = document.createElement("h3");
-        title.style.marginTop = "3px";
         title.textContent = category.name;
+        title.style.marginTop = ".5rem";
         title.contentEditable = true;
         title.onblur = () => {
             const newName = title.textContent.trim();
@@ -209,6 +209,7 @@ const renderCategories = () => {
             // Item namn
             const itemName = document.createElement("input");
             itemName.value = item.name;
+            itemName.id = "item-name";
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;

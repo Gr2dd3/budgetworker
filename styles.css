@@ -50,8 +50,6 @@ input {
 }
 
 .category {
-    cursor: move;
-    border: 2px dashed #ccc; /* Ger en visuell indikator */
     margin-bottom: 10px;
     padding: 5px;
     border: 1px solid #ccc;
@@ -64,14 +62,14 @@ input {
 }
 
 .category-totals {
-    margin-top: 10px;
-    padding: 5px;
+    margin: .2rem;
+    padding: 3px;
     background-color: #f0f0f0;
     border-top: 1px solid #ccc;
     font-size: 14px;
 }
 
-.div-headlines {
+#div-headlines {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -84,6 +82,10 @@ input {
     display: flex;
     justify-content: start;
     max-width: 95%;
+}
+
+.item-name {
+    min-width: 2rem;
 }
 
 .item input {
@@ -119,7 +121,7 @@ input {
         input {
             max-width: 21vw; /* Change item width here */
         }
-        .div-headlines {
+        #div-headlines {
             margin-right: 25vw;
         }
         ul {
@@ -134,7 +136,7 @@ input {
         input {
             max-width: 34vw; /* Change item width here */
         }
-        .div-headlines {
+        #div-headlines {
             margin-right: 100px;
         }
         ul {
