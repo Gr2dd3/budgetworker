@@ -271,6 +271,8 @@ const renderCategories = () => {
 
         // Visa totalsummor för kategorin
         const totals = calculateCategoryTotals(category);
+        console.log('totals.totalExpected: ' + totals.totalExpected);
+        console.log('totals.totalActual: ' + totals.totalActual);
         const totalsDiv = document.createElement("div");
         totalsDiv.classList.add("category-totals");
         totalsDiv.innerHTML = `
