@@ -94,16 +94,16 @@ const renderCategories = () => {
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
-            // Välj färg på kategorin
-            const colorInput = document.createElement("input");
-            colorInput.Id ="color-input";
-            colorInput.type = "color";
-            colorInput.value = category.color || "#f9f9f9";
-            colorInput.onchange = () => {
-                categories[index].color = colorInput.value;
-                categoryEl.style.backgroundColor = colorInput.value;
-            };
-            categoryEl.appendChild(colorInput);
+        // Välj färg på kategorin
+        const colorInput = document.createElement("input");
+        colorInput.Id ="color-input";
+        colorInput.type = "color";
+        colorInput.value = category.color || "#f9f9f9";
+        colorInput.onchange = () => {
+            categories[index].color = colorInput.value;
+            categoryEl.style.backgroundColor = colorInput.value;
+        };
+        categoryEl.appendChild(colorInput);
 
         // Kategorinamn
         const title = document.createElement("h3");
@@ -118,6 +118,22 @@ const renderCategories = () => {
                 title.textContent = categories[index].name;
             }
         };
+
+        // Typ (inkomst/utgift)
+        const typeSelect = document.createElement("select");
+        const incomeOption = document.createElement("option");
+        incomeOption.value = "income";
+        incomeOption.textContent = "Inkomst";
+        const expenseOption = document.createElement("option");
+        expenseOption.value = "expense";
+        expenseOption.textContent = "Utgift";
+
+        typeSelect.append(incomeOption, expenseOption);
+        typeSelect.value = category.type || "expense";
+        typeSelect.onchange = () => {
+            categories[index].type = typeSelect.value;
+        };
+        categoryEl.appendChild(typeSelect);
 
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
@@ -206,6 +222,7 @@ const loadCategories = async () => {
         alert("Kunde inte ladda kategorier. Kontrollera din nätverksanslutning.");
     }
 };
+
 // Validera att kategorier har allt nödvändigt
 const validateCategory = (category) => {
     if (!category.name || typeof category.name !== "string") return false;
@@ -215,55 +232,6 @@ const validateCategory = (category) => {
     }
     return true;
 };
-
-
-// Spara alla kategorier i Firestore
-/*const saveCategoriesToFirestore = async () => {
-    console.log("Sparar kategori:", JSON.stringify(category, null, 2));
-
-    if (!validateCategory(category)) {
-        console.error("Ogiltig kategori:", category);
-        return;
-    }
-    console.log("Sparar kategorier till Firestore:", categories);
-    await Promise.all(categories.map(async (category) => {
-        if (!category.id) {
-            console.error("Kategori saknar ett giltigt ID:", category);
-            return;
-        }
-        const categoryDoc = doc(db, "categories", category.id);
-        await updateDoc(categoryDoc, { ...category }).catch((error) => {
-            console.error(`Misslyckades att spara kategori med ID ${category.id}:`, error);
-        });
-    }));
-    console.log("Kategorier sparade i Firestore!");
-};*/
-
-// Spara kategorier i Firestore (google)
-/*const saveCategoriesToFirestore = async (categories) => {
-    const categoriesCollection = collection(db, "categories");
-    for (const category of categories) {
-        const categoryDoc = doc(db, "categories", category.id);
-        await updateDoc(categoriesCollection, category);
-    }
-    console.log("Kategorier sparade i Firestore!");
-};*/
-
-// FUNKAR DENNA VERKLIGEN FÖR SPARNING???
-// Spara endast ändrade kategorier till Firestore
-/*const saveCategoryToFirestore = async (category) => {
-    const categoryDoc = doc(db, "categories", category.id);
-    await updateDoc(categoryDoc, { ...category });
-};*/
-
-/*const saveCategoriesToFirestore = async (categories) => {
-    const categoriesCollection = collection(db, "categories");
-    for (const category of categories) {
-        await addDoc(categoriesCollection, category);
-    }
-    console.log("Kategorier sparade i Firestore!");
-};*/
-
 
 // Inloggning (TODO: Byt till firebase Authentication)
 const validCredentials = { 
