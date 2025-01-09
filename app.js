@@ -115,7 +115,7 @@ const renderCategories = () => {
         };
         categoryEl.appendChild(colorInput);
 
-        // Välj vilken placering kategorin ska ha
+        // Välj vilken placering kategorin ska ha i kategori-listan
         const orderInput = document.createElement("input");
         orderInput.type = "number";
         orderInput.value = category.order || index + 1;
@@ -137,6 +137,7 @@ const renderCategories = () => {
 
         // Kategorinamn
         const title = document.createElement("h3");
+        title.style.marginTop = "3px";
         title.textContent = category.name;
         title.contentEditable = true;
         title.onblur = () => {
@@ -164,6 +165,17 @@ const renderCategories = () => {
             categories[index].type = typeSelect.value;
         };
         categoryEl.appendChild(typeSelect);
+
+        // Rubriker för item fälten
+        const spanHeadlines = document.createElement("span");
+        spanHeadlines.id = "span-headlines";
+        const itemNameHeadline = document.createElement("p");
+        itemNameHeadline.innerHTML = "Namn";
+        const itemExpectedHeadline = document.createElement("p");
+        itemExpectedHeadline.innerHTML = "Förmodad";
+        const itemActualHeadline = document.createElement("p");
+        itemActualHeadline.innerHTML = "Faktisk";
+        spanHeadlines.appendChild(itemNameHeadline, itemExpectedHeadline, itemActualHeadline);
 
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
@@ -198,10 +210,8 @@ const renderCategories = () => {
                 const value = parseFloat(itemActual.value) || 0;
                 categories[index].items[itemIndex].actual = value;
             };
-            /*itemActual.onchange = () => {
-                categories[index].items[itemIndex].actual = parseFloat(itemActual.value);
-            };*/
 
+            // Ta bort Item knapp
             const deleteItemButton = document.createElement("button");
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
@@ -221,7 +231,6 @@ const renderCategories = () => {
             categories[index].items.push({ name: "", expected: 0, actual: 0 });
             renderCategories();
             calculateTotals();
-            // saveCategoriesToFirestore();
         };
 
         // Ta bort kategori
@@ -237,7 +246,17 @@ const renderCategories = () => {
             calculateTotals();
         };
 
-        categoryEl.append(title, itemList, addItemButton, deleteCategoryButton);
+        // Visa totalsummor för kategorin
+        const totals = calculateCategoryTotals(category);
+        const totalsDiv = document.createElement("div");
+        totalsDiv.classList.add("category-totals");
+        totalsDiv.innerHTML = `
+            <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
+            <strong>Total faktisk:</strong> ${totals.totalActual} kr
+        `;
+        categoryEl.appendChild(totalsDiv);
+
+        categoryEl.append(title, itemList, addItemButton, spanHeadlines, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };
@@ -255,16 +274,6 @@ const loadCategories = async () => {
         console.error("Fel vid laddning av kategorier:", error);
         alert("Kunde inte ladda kategorier. Kontrollera din nätverksanslutning.");
     }
-};
-
-// Validera att kategorier har allt nödvändigt
-const validateCategory = (category) => {
-    if (!category.name || typeof category.name !== "string") return false;
-    if (!Array.isArray(category.items)) return false;
-    if (category.items.some(item => typeof item.name !== "string" || isNaN(item.expected) || isNaN(item.actual))) {
-        return false;
-    }
-    return true;
 };
 
 // Inloggning (TODO: Byt till firebase Authentication)
@@ -300,6 +309,7 @@ const saveCategoriesToFirestore = async (categories) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Logga in
     const loginScreen = document.getElementById("login-screen");
     const appScreen = document.getElementById("app");
     const errorMessage = document.getElementById("error-message");

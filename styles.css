@@ -63,7 +63,15 @@ input {
     margin: 0;
 }
 
-.headers {
+.category-totals {
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border-top: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.span-headlines {
     display: flex;
     justify-content: space-around;
     margin-right: 60px;
@@ -80,6 +88,11 @@ input {
 .item input {
     max-width: auto;
 }
+
+.total-headline {
+    margin-left: .5rem;
+}
+
 
 .probTotal {
     display: block;
@@ -105,11 +118,14 @@ input {
         input {
             max-width: 21vw; /* Change item width here */
         }
-        .headers {
+        .span-headlines {
             margin-right: 25vw;
         }
         ul {
             padding: 2%;
+        }
+        .total-headline {
+            margin-left: 1.5rem;
         }
 }
 
@@ -117,10 +133,13 @@ input {
         input {
             max-width: 34vw; /* Change item width here */
         }
-        .headers {
+        .span-headlines {
             margin-right: 100px;
         }
         ul {
             padding: 2%;
+        }
+        .total-headline {
+            margin-left: 3.5rem;
         }
 }
