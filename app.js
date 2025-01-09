@@ -189,11 +189,11 @@ const renderCategories = () => {
         // Rubriker för item fälten
         const spanHeadlines = document.createElement("div");
         spanHeadlines.id = "div-headlines";
-        const itemNameHeadline = document.createElement("p");
+        const itemNameHeadline = document.createElement("h5");
         itemNameHeadline.innerHTML = "Namn";
-        const itemExpectedHeadline = document.createElement("p");
+        const itemExpectedHeadline = document.createElement("h5");
         itemExpectedHeadline.innerHTML = "Förmodad";
-        const itemActualHeadline = document.createElement("p");
+        const itemActualHeadline = document.createElement("h5");
         itemActualHeadline.innerHTML = "Faktisk";
         spanHeadlines.appendChild(itemNameHeadline);
         spanHeadlines.appendChild(itemExpectedHeadline);
