@@ -98,6 +98,12 @@ const categoryList = document.getElementById("category-list");
 const renderCategories = () => {
     categoryList.innerHTML = "";
 
+    // Kontroll och åtgärd om inga kategorier finns
+    if (!categories || categories.length === 0) {
+        categoryList.innerHTML = "<p>Inga kategorier att visa</p>";
+        return;
+    }    
+
     categories.forEach((category, index) => {
         // Skapa kategori list-item
         const categoryEl = document.createElement("li");
@@ -106,7 +112,7 @@ const renderCategories = () => {
 
         // Välj färg på kategorin
         const colorInput = document.createElement("input");
-        colorInput.Id ="color-input";
+        colorInput.id ="color-input";
         colorInput.type = "color";
         colorInput.value = category.color || "#f9f9f9";
         colorInput.onchange = () => {
@@ -175,7 +181,10 @@ const renderCategories = () => {
         itemExpectedHeadline.innerHTML = "Förmodad";
         const itemActualHeadline = document.createElement("p");
         itemActualHeadline.innerHTML = "Faktisk";
-        spanHeadlines.appendChild(itemNameHeadline, itemExpectedHeadline, itemActualHeadline);
+        spanHeadlines.appendChild(itemNameHeadline);
+        spanHeadlines.appendChild(itemExpectedHeadline);
+        spanHeadlines.appendChild(itemActualHeadline);
+
 
         //Skapa ul för items i en kategori
         const itemList = document.createElement("ul");
@@ -256,7 +265,7 @@ const renderCategories = () => {
         `;
         categoryEl.appendChild(totalsDiv);
 
-        categoryEl.append(title, itemList, addItemButton, spanHeadlines, deleteCategoryButton);
+        categoryEl.append(title, spanHeadlines, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };
