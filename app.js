@@ -247,6 +247,18 @@ const renderCategories = () => {
             itemList.appendChild(itemEl);
         });
 
+        // Visa totalsummor för kategorin
+        const totals = calculateCategoryTotals(category);
+        console.log('totals.totalExpected: ' + totals.totalExpected);
+        console.log('totals.totalActual: ' + totals.totalActual);
+        const totalsDiv = document.createElement("div");
+        totalsDiv.classList.add("category-totals");
+        totalsDiv.innerHTML = `
+            <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
+            <strong>Total faktisk:</strong> ${totals.totalActual} kr
+        `;
+        itemList.after(totalsDiv);
+
         // Lägg till ny item
         const addItemButton = document.createElement("button");
         addItemButton.textContent = "Lägg till rad";
@@ -269,18 +281,9 @@ const renderCategories = () => {
             calculateTotals();
         };
 
-        // Visa totalsummor för kategorin
-        const totals = calculateCategoryTotals(category);
-        console.log('totals.totalExpected: ' + totals.totalExpected);
-        console.log('totals.totalActual: ' + totals.totalActual);
-        const totalsDiv = document.createElement("div");
-        totalsDiv.classList.add("category-totals");
-        totalsDiv.innerHTML = `
-            <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
-            <strong>Total faktisk:</strong> ${totals.totalActual} kr
-        `;
 
-        categoryEl.append(title, spanHeadlines, itemList, totalsDiv, addItemButton, deleteCategoryButton);
+
+        categoryEl.append(title, spanHeadlines, itemList, addItemButton, deleteCategoryButton);
         categoryList.appendChild(categoryEl);
     });
 };
