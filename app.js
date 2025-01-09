@@ -36,6 +36,17 @@ const fetchCategoriesFromFirestore = async () => {
     });
 };
 
+// Ta bort kategori permanent
+const deleteCategoryFromFirestore = async (categoryId) => {
+    try {
+        const categoryDoc = doc(db, "categories", categoryId);
+        await deleteDoc(categoryDoc);
+        console.log(`Kategori med id ${categoryId} har tagits bort från Firestore.`);
+    } catch (error) {
+        console.error("Fel vid borttagning av kategori:", error);
+    }
+};
+
 // Sätt elementen för uträkning och kolla att de finns innan de körs
 const setTextContent = (id, text) => {
     const element = document.getElementById(id);
@@ -197,7 +208,11 @@ const renderCategories = () => {
         // Ta bort kategori
         const deleteCategoryButton = document.createElement("button");
         deleteCategoryButton.textContent = "Ta bort kategori";
-        deleteCategoryButton.onclick = () => {
+        deleteCategoryButton.onclick = async () => {
+            const categoryId = categories[index].id;
+            if (categoryId) {
+                await deleteCategoryFromFirestore(categoryId);
+            }
             categories.splice(index, 1);
             renderCategories();
             calculateTotals();
