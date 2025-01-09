@@ -89,8 +89,6 @@ const calculateTotals = () => {
     setTextContent("total-actual", `Faktisk budget: ${actualIncome - actualExpense} kr`);
 };
 
-
-
 // För att lagra kategorier
 let categories = []; 
 
