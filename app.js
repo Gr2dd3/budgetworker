@@ -282,7 +282,6 @@ const renderCategories = () => {
             calculateTotals();
         };
 
-
         categoryEl.append(
             title, 
             spanHeadlines, 
