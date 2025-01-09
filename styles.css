@@ -77,7 +77,8 @@ input {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    margin-right: 60px;
+    margin: 0 60px 0 0;
+    padding: 0;
 }
 
 .item {
@@ -94,6 +95,10 @@ input {
 
 .item input {
     max-width: auto;
+}
+
+#delete-button {
+    margin: .3rem 0 0 5rem;
 }
 
 .probTotal {

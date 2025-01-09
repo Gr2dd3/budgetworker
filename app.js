@@ -271,6 +271,7 @@ const renderCategories = () => {
         // Ta bort kategori
         const deleteCategoryButton = document.createElement("button");
         deleteCategoryButton.textContent = "Ta bort kategori";
+        deleteCategoryButton.id = "delete-button";
         deleteCategoryButton.onclick = async () => {
             const categoryId = categories[index].id;
             if (categoryId) {
