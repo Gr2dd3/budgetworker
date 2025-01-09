@@ -84,7 +84,7 @@ input {
     max-width: 95%;
 }
 
-.item-name {
+#item-name {
     min-width: 2rem;
 }
 
