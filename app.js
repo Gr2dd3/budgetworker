@@ -89,6 +89,20 @@ const calculateTotals = () => {
     setTextContent("total-actual", `Faktisk budget: ${actualIncome - actualExpense} kr`);
 };
 
+// Räkna ut totalen för varje kategori
+const calculateCategoryTotals = (category) => {
+    let totalExpected = 0;
+    let totalActual = 0;
+
+    category.items.forEach(item => {
+        totalExpected += parseFloat(item.expected) || 0;
+        totalActual += parseFloat(item.actual) || 0;
+    });
+
+    return { totalExpected, totalActual };
+};
+
+
 // För att lagra kategorier
 let categories = []; 
 
