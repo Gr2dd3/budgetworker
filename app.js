@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore , collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+import { getFirestore , collection, getDocs, addDoc, updateDoc, doc, query, orderBy } from "firebase/firestore";
 
 
 const firebaseConfig = {
@@ -21,7 +21,8 @@ const db = getFirestore(app);
 // Hämta kategorier från Firestore
 const fetchCategoriesFromFirestore = async () => {
     const categoriesCollection = collection(db, "categories");
-    const snapshot = await getDocs(categoriesCollection);
+    const sortedQuery = query(categoriesCollection, orderBy("order"));
+    const snapshot = await getDocs(sortedQuery);
     return snapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -115,6 +116,26 @@ const renderCategories = () => {
             categoryEl.style.backgroundColor = colorInput.value;
         };
         categoryEl.appendChild(colorInput);
+
+        // Välj vilken placering kategorin ska ha
+        const orderInput = document.createElement("input");
+        orderInput.type = "number";
+        orderInput.value = category.order || index + 1;
+        orderInput.min = 1;
+        orderInput.onchange = () => {
+            const newOrder = parseInt(orderInput.value, 10);
+            if (newOrder > 0) {
+                categories[index].order = newOrder;
+                categories.sort((a, b) => a.order - b.order);
+                renderCategories();
+                calculateTotals();
+            } else {
+                alert("Ordningen måste vara ett positivt heltal!");
+                orderInput.value = categories[index].order;
+            }
+        };
+        categoryEl.appendChild(orderInput);
+
 
         // Kategorinamn
         const title = document.createElement("h3");
@@ -258,19 +279,22 @@ const validCredentials = {
 const saveCategoriesToFirestore = async (categories) => {
     try {
         const categoriesCollection = collection(db, "categories");
-        
+
         for (const category of categories) {
             if (category.id) {
-                // Uppdatera befintlig kategori
                 const categoryDoc = doc(categoriesCollection, category.id);
-                await updateDoc(categoryDoc, category);
+                await updateDoc(categoryDoc, {
+                    name: category.name,
+                    type: category.type,
+                    color: category.color,
+                    items: category.items,
+                    order: category.order
+                });
             } else {
-                // Skapa ny kategori
                 const newCategoryRef = await addDoc(categoriesCollection, category);
-                category.id = newCategoryRef.id; // Tilldela ID till kategorin lokalt
+                category.id = newCategoryRef.id;
             }
         }
-
         console.log("Kategorier sparade framgångsrikt!");
     } catch (error) {
         console.error("Fel vid sparning av kategorier:", error);
@@ -302,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
         addCategoryButton.addEventListener("click", () => {
-            categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [] });
+            categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [], order: categories.length + 1});
             renderCategories();
             calculateTotals();
         });
