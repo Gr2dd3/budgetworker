@@ -20,6 +20,7 @@ const db = getFirestore(app);
 
 // Hämta kategorier från Firestore
 const fetchCategoriesFromFirestore = async () => {
+    normalizeCategories();
     const categoriesCollection = collection(db, "categories");
     const sortedQuery = query(categoriesCollection, orderBy("order"));
     const snapshot = await getDocs(sortedQuery);
@@ -42,6 +43,7 @@ const deleteCategoryFromFirestore = async (categoryId) => {
     try {
         const categoryDoc = doc(db, "categories", categoryId);
         await deleteDoc(categoryDoc);
+        categories = categories.filter(category => category.id !== categoryId);
         console.log(`Kategori med id ${categoryId} har tagits bort från Firestore.`);
     } catch (error) {
         console.error("Fel vid borttagning av kategori:", error);
@@ -132,6 +134,8 @@ const renderCategories = () => {
         colorInput.onchange = () => {
             categories[index].color = colorInput.value;
             categoryEl.style.backgroundColor = colorInput.value;
+            renderCategories();
+            calculateTotals();
         };
         categoryEl.appendChild(colorInput);
 
@@ -164,6 +168,8 @@ const renderCategories = () => {
             const newName = title.textContent.trim();
             if (newName) {
                 categories[index].name = newName;
+                renderCategories();
+                calculateTotals();
             } else {
                 alert("Kategorinamn får inte vara tomt!");
                 title.textContent = categories[index].name;
@@ -183,6 +189,8 @@ const renderCategories = () => {
         typeSelect.value = category.type || "expense";
         typeSelect.onchange = () => {
             categories[index].type = typeSelect.value;
+            renderCategories();
+            calculateTotals();
         };
         categoryEl.appendChild(typeSelect);
 
@@ -213,6 +221,8 @@ const renderCategories = () => {
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
                 categories[index].items[itemIndex].name = itemName.value;
+                renderCategories();
+                calculateTotals();
             };
 
             // Prisfält förmodad
@@ -223,6 +233,7 @@ const renderCategories = () => {
             itemExpected.onchange = () => {
                 const value = parseFloat(itemExpected.value) || 0;
                 categories[index].items[itemIndex].expected = value;
+                renderCategories();
                 calculateTotals();
             };
 
@@ -234,6 +245,7 @@ const renderCategories = () => {
             itemActual.onchange = () => {
                 const value = parseFloat(itemActual.value) || 0;
                 categories[index].items[itemIndex].actual = value;
+                renderCategories();
                 calculateTotals();
             };
 
@@ -269,7 +281,7 @@ const renderCategories = () => {
             renderCategories();
             calculateTotals();
         };
-
+        
         // Ta bort kategori
         const deleteCategoryButton = document.createElement("button");
         deleteCategoryButton.textContent = "Ta bort kategori";
@@ -302,6 +314,7 @@ const renderCategories = () => {
 
 // Ladda kategorier vid start av app
 const loadCategories = async () => {
+    normalizeCategories();
     try {
         categories = await fetchCategoriesFromFirestore();
         if (!categories.length) {
@@ -314,6 +327,18 @@ const loadCategories = async () => {
         alert("Kunde inte ladda kategorier. Kontrollera din nätverksanslutning.");
     }
 };
+
+// Kontroll av lokala kategori id
+const normalizeCategories = async () => {
+    categories.forEach(category => {
+        if (!category.id.startsWith("temp_")) {
+            console.log(`Kategori-ID verifierad: ${category.id}`);
+        } else {
+            console.warn(`Kategori har ett temporärt ID: ${category.id}`);
+        }
+    });
+};
+
 
 // Inloggning (TODO: Byt till firebase Authentication)
 const validCredentials = { 
@@ -330,6 +355,7 @@ const saveCategoriesToFirestore = async (categories) => {
             if (category.id) {
                 const categoryDoc = doc(categoriesCollection, category.id);
                 await updateDoc(categoryDoc, {
+                    id: category.id,
                     name: category.name,
                     type: category.type,
                     color: category.color,
@@ -372,14 +398,36 @@ document.addEventListener("DOMContentLoaded", () => {
     // Addera kategorier
     const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
+    addCategoryButton.addEventListener("click", async () => {
+        const newCategoryRef = await addDoc(collection(db, "categories"), {
+            name: "Ny kategori",
+            color: "#f9f9f9",
+            type: "expense",
+            items: [],
+            order: categories.length + 1,
+        });
+        categories.push({
+            id: newCategoryRef.id,
+            name: "Ny kategori",
+            color: "#f9f9f9",
+            type: "expense",
+            items: [],
+            order: categories.length + 1,
+        });
+        renderCategories();
+        calculateTotals();
+    });
+    } else {
+        console.error("Add category button not found!");
+    }
+    
+    /*if (addCategoryButton) {
         addCategoryButton.addEventListener("click", () => {
             categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [], order: categories.length + 1});
             renderCategories();
             calculateTotals();
         });
-    } else {
-        console.error("Add category button not found!");
-    }
+    } */
 
     // SPARA KNAPPEN
     const saveButton = document.getElementById("save-button");
@@ -387,6 +435,8 @@ document.addEventListener("DOMContentLoaded", () => {
         saveButton.addEventListener("click", async () => {
             try {
                 await saveCategoriesToFirestore(categories);
+                renderCategories();
+                calculateTotals();
                 alert("Kategorier sparade!");
             } catch (error) {
                 console.error("Fel vid sparning:", error);
