@@ -223,6 +223,7 @@ const renderCategories = () => {
             itemExpected.onchange = () => {
                 const value = parseFloat(itemExpected.value) || 0;
                 categories[index].items[itemIndex].expected = value;
+                calculateTotals();
             };
 
             // Prisfält faktisk
@@ -233,6 +234,7 @@ const renderCategories = () => {
             itemActual.onchange = () => {
                 const value = parseFloat(itemActual.value) || 0;
                 categories[index].items[itemIndex].actual = value;
+                calculateTotals();
             };
 
             // Ta bort Item knapp
@@ -273,13 +275,16 @@ const renderCategories = () => {
         deleteCategoryButton.textContent = "Ta bort kategori";
         deleteCategoryButton.id = "delete-button";
         deleteCategoryButton.onclick = async () => {
-            const categoryId = categories[index].id;
+            const categoryId = categories[index].id;           
             if (categoryId) {
                 await deleteCategoryFromFirestore(categoryId);
             }
             categories.splice(index, 1);
             renderCategories();
             calculateTotals();
+            if (!categoryId) {
+                console.warn("Kategori saknar ID och kan inte tas bort från Firestore.");
+            } 
         };
 
         categoryEl.append(
