@@ -487,5 +487,4 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         console.error("Save button not found!");
     }
-
 });

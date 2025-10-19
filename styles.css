@@ -37,7 +37,7 @@ ul {
 
 input { 
     display: block; 
-    max-width: 20vw; /* Change item width here */ 
+    max-width: 20vw;
     margin: 1px 1px; 
     padding: 1px; 
     border: 1px solid #ccc; 
@@ -65,19 +65,18 @@ input {
     margin: 0; 
 } 
 
-/*.category-totals { 
-    margin: .2rem; 
-    padding: 3px; 
-    background-color: #f0f0f0; 
-    border-top: 1px solid #ccc; 
-    font-size: 14px; 
-} */
+/* Stilen för .category-totals är borttagen härifrån, vilket löser den gröna rest-texten om den dök upp från en statisk rad. */
 
 
-/* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT V3) --- */
+/* ------------------------------------------------------------------------- */
+/* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT & POSITIONERING) --- */
+/* ------------------------------------------------------------------------- */
+
 #div-headlines { 
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr auto; 
+    /* JUSTERAT: Minskar namnfältet (2fr -> 1.5fr) och ökar de numeriska fälten (1fr -> 1.15fr). */
+    /* Detta drar de tre sista kolumnerna/rubrikerna tydligt åt VÄNSTER. */
+    grid-template-columns: 1.5fr 1.15fr 1.15fr 1.15fr auto; 
     gap: 5px;
     padding: 0 5px;
     margin-bottom: 5px;
@@ -101,12 +100,13 @@ input {
 #div-headlines h5 {
     font-size: 0.9em;
     font-weight: bold;
-    margin: 0 2rem 0 0;
+    margin: 0;
     
+    /* Behåller texten högerjusterad inuti H5:an */
     text-align: right; 
     
-    /* SKARPT JUSTERAT: Flyttar texten ännu längre åt vänster */
-    padding-right: 40%; /* Ökat från 50% */
+    /* Återställer padding till ett centrerat värde */
+    padding-right: 50%;
     
     cursor: text;
     white-space: nowrap;
@@ -119,9 +119,12 @@ input {
     border: 1px solid #ccc;
     padding-top: 2px;
     padding-bottom: 2px;
+    width: auto; /* Återställer bredden */
 }
 
-/* --- UPPDATERAD STIL FÖR ITEM-RADEN (VIKTIGT) --- */
+/* ------------------------------------------------------------------------- */
+/* --- UPPDATERAD STIL FÖR ITEM-RADEN OCH INPUTS --- */
+/* ------------------------------------------------------------------------- */
 .item { 
     pointer-events: auto; 
     user-select: none; 
@@ -147,7 +150,9 @@ input {
     margin: 0;
 }
 
+/* ------------------------------------------------------------------------- */
 /* --- NY STIL FÖR TOTALSUMMERINGARNA LÄNGST NER (Tre block i rad) --- */
+/* ------------------------------------------------------------------------- */
 
 #totals {
     margin-top: 20px;
@@ -161,7 +166,7 @@ input {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 0; /* Marginalen behövs inte längre */
 }
 
 .total-column-block {
@@ -201,32 +206,11 @@ input {
 }
 
 
-/* Den NYA TREDJE SUMMERINGEN: Total skillnad */
-#final-difference {
-    text-align: center;
-    padding: 10px 0;
-}
+/* RENSAT: Borttagna stilar för #final-difference, #total-difference och hr-taggen längst ner. */
 
-#total-difference {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: #28a745; 
-    margin: 0;
-    padding: 5px 10px;
-    border: 2px solid #28a745;
-    display: inline-block;
-    border-radius: 5px;
-}
-
-
-hr {
-    border: none;
-    border-top: 1px dashed #ccc;
-    margin: 10px 0;
-}
-
-
-/* --- MEDIA QUERIES (OFÖRÄNDRADE) --- */
+/* ------------------------------------------------------------------------- */
+/* --- MEDIA QUERIES --- */
+/* ------------------------------------------------------------------------- */
 
 @media (min-width: 415px) { 
     input { 
