@@ -77,6 +77,10 @@ input {
     margin-bottom: 5px; 
 } 
 
+#div-headlines:first-child {
+    margin-left: auto;
+}
+
 #div-headlines h5 { 
     flex: 1; 
     text-align: center; 
@@ -119,12 +123,20 @@ input {
 
 @media (min-width: 415px) { 
     #div-headlines h5, .item input { 
-        width: auto; 
+        width: auto;
     } 
+
+    #div-headlines {
+        margin: 0 2rem 0 4rem;
+    }
 } 
 
 @media (min-width: 660px) { 
     #div-headlines h5, .item input { 
-        width: auto; 
+        width: auto;
     } 
+
+    #div-headlines {
+        margin: 0 2rem 0 4rem;
+    }
 } 
