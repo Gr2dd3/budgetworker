@@ -122,6 +122,91 @@ input {
     background-color: #a7e7d8d2;
 }
 
+/* Wrapper för kolumnrubrik + delete-knapp */
+.column-headers {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
+
+.col-header-wrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 4px;
+    background-color: #e0e0e0;
+    padding: 2px 4px;
+    border-radius: 5px;
+}
+
+/* Kolumnnamn editable */
+.col-header-wrapper h5 {
+    margin: 0;
+    padding: 0 4px;
+    font-size: 14px;
+    min-width: 50px;
+}
+.col-header-wrapper h5:focus {
+    outline: none;
+    border-bottom: 1px dashed #10031c;
+}
+
+/* Ta bort kolumn-knapp */
+.delete-col-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    margin-left: 2px;
+}
+.delete-col-btn:hover {
+    background-color: #e60000;
+}
+
+.item input[readonly] {
+    cursor: default;
+    background-color: #a7e7d8d2; /* kan justeras */
+    font-weight: bold;
+}
+
+/* Lägg till kolumn-knapp */
+.add-col-btn {
+    background-color: #10031c;
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    margin-left: 4px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.add-col-btn:hover {
+    background-color: gray;
+}
+
+/* Inputs för items i kolumner */
+.item input {
+    max-width: 10vw; /* eller justera efter behov */
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
+
+/* Anpassa totalsummor */
+.category-totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.category-totals strong {
+    margin-right: 4px;
+}
+
+
 @media (min-width: 415px) {
         input {
             max-width: 21vw; /* Change item width here */

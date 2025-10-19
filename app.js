@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore , collection, getDocs, addDoc, updateDoc, doc, query, orderBy } from "firebase/firestore";
+import { getFirestore , collection, getDocs, addDoc, updateDoc, doc, query, orderBy, deleteDoc } from "firebase/firestore";
 
-
+// Firebase-konfiguration
 const firebaseConfig = {
     apiKey: "AIzaSyD8B8qwp91a6N8_B_hwds5j8jsGZhrFtyk",
     authDomain: "ourbudget-d2b40.firebaseapp.com",
@@ -18,6 +18,9 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
+// För att lagra kategorier
+let categories = [];
+
 // Hämta kategorier från Firestore
 const fetchCategoriesFromFirestore = async () => {
     normalizeCategories();
@@ -29,11 +32,17 @@ const fetchCategoriesFromFirestore = async () => {
         return {
             id: doc.id,
             ...data,
-            items: Array.isArray(data.items) ? data.items.map(item => ({
-                name: item.name || "",
-                expected: parseFloat(item.expected) || 0,
-                actual: parseFloat(item.actual) || 0
-            })) : []
+            columns: data.columns || [
+                { name: "Förmodad", key: "expected" },
+                { name: "Faktisk", key: "actual" }
+            ],
+            items: Array.isArray(data.items) ? data.items.map(item => {
+                const newItem = {};
+                (data.columns || [{ key: "expected" }, { key: "actual" }]).forEach(col => {
+                    newItem[col.key] = parseFloat(item[col.key]) || 0;
+                });
+                return { ...item, ...newItem };
+            }) : []
         };
     });
 };
@@ -50,39 +59,29 @@ const deleteCategoryFromFirestore = async (categoryId) => {
     }
 };
 
-// Sätt elementen för uträkning och kolla att de finns innan de körs
+// Sätt elementen för uträkning
 const setTextContent = (id, text) => {
     const element = document.getElementById(id);
-    if (element) {
-        element.textContent = text;
-    } else {
-        console.error(`Element med id "${id}" hittades inte!`);
-    }
+    if (element) element.textContent = text;
+    else console.error(`Element med id "${id}" hittades inte!`);
 };
 
-// Räkna ut total
+// Beräkna totalsummor
 const calculateTotals = () => {
-    let expectedIncome = 0;
-    let expectedExpense = 0;
-    let actualIncome = 0;
-    let actualExpense = 0;
+    let expectedIncome = 0, expectedExpense = 0, actualIncome = 0, actualExpense = 0;
 
     categories.forEach(category => {
         category.items.forEach(item => {
-            const expected = parseFloat(item.expected) || 0;
-            const actual = parseFloat(item.actual) || 0;
-
             if (category.type === "income") {
-                expectedIncome += expected;
-                actualIncome += actual;
+                expectedIncome += item.expected || 0;
+                actualIncome += item.actual || 0;
             } else if (category.type === "expense") {
-                expectedExpense += expected;
-                actualExpense += actual;
+                expectedExpense += item.expected || 0;
+                actualExpense += item.actual || 0;
             }
         });
     });
 
-    // Uppdatera DOM
     setTextContent("total-budget-expected-income", `Förmodad inkomst: ${expectedIncome} kr`);
     setTextContent("total-budget-expected-expense", `Förmodad utgift: ${expectedExpense} kr`);
     setTextContent("total-expected", `Förmodad budget: ${expectedIncome - expectedExpense} kr`);
@@ -91,44 +90,32 @@ const calculateTotals = () => {
     setTextContent("total-actual", `Faktisk budget: ${actualIncome - actualExpense} kr`);
 };
 
-// Räkna ut totalen för varje kategori
+// Beräkna totalsumma per kategori
 const calculateCategoryTotals = (category) => {
-    let totalExpected = 0;
-    let totalActual = 0;
-
+    const totals = {};
+    category.columns.forEach(col => totals[col.key] = 0);
     category.items.forEach(item => {
-        totalExpected += parseFloat(item.expected) || 0;
-        totalActual += parseFloat(item.actual) || 0;
+        category.columns.forEach(col => totals[col.key] += parseFloat(item[col.key]) || 0);
     });
-
-    return { totalExpected, totalActual };
+    return totals;
 };
-
-
-// För att lagra kategorier
-let categories = []; 
 
 // Rendera kategorier
 const categoryList = document.getElementById("category-list");
-
 const renderCategories = () => {
     categoryList.innerHTML = "";
-
-    // Kontroll och åtgärd om inga kategorier finns
     if (!categories || categories.length === 0) {
         categoryList.innerHTML = "<p>Inga kategorier att visa</p>";
         return;
-    }    
+    }
 
     categories.forEach((category, index) => {
-        // Skapa kategori list-item
         const categoryEl = document.createElement("li");
         categoryEl.classList.add("category");
         categoryEl.style.backgroundColor = category.color || "#f9f9f9";
 
-        // Välj färg på kategorin
+        // Färg
         const colorInput = document.createElement("input");
-        colorInput.id ="color-input";
         colorInput.type = "color";
         colorInput.value = category.color || "#f9f9f9";
         colorInput.onchange = () => {
@@ -139,7 +126,7 @@ const renderCategories = () => {
         };
         categoryEl.appendChild(colorInput);
 
-        // Välj vilken placering kategorin ska ha i kategori-listan
+        // Order
         const orderInput = document.createElement("input");
         orderInput.type = "number";
         orderInput.value = category.order || index + 1;
@@ -158,168 +145,162 @@ const renderCategories = () => {
         };
         categoryEl.appendChild(orderInput);
 
-
-        // Kategorinamn
+        // Namn
         const title = document.createElement("h3");
         title.textContent = category.name;
-        title.id = "category-name";
         title.contentEditable = true;
         title.onblur = () => {
             const newName = title.textContent.trim();
-            if (newName) {
-                categories[index].name = newName;
-                renderCategories();
-                calculateTotals();
-            } else {
-                alert("Kategorinamn får inte vara tomt!");
-                title.textContent = categories[index].name;
-            }
+            if (newName) categories[index].name = newName;
+            else title.textContent = categories[index].name;
+            renderCategories();
+            calculateTotals();
         };
 
-        // Typ (inkomst/utgift)
+        // Typ
         const typeSelect = document.createElement("select");
-        const incomeOption = document.createElement("option");
-        incomeOption.value = "income";
-        incomeOption.textContent = "Inkomst";
-        const expenseOption = document.createElement("option");
-        expenseOption.value = "expense";
-        expenseOption.textContent = "Utgift";
-
-        typeSelect.append(incomeOption, expenseOption);
+        ["income","expense"].forEach(val => {
+            const option = document.createElement("option");
+            option.value = val;
+            option.textContent = val === "income" ? "Inkomst" : "Utgift";
+            typeSelect.appendChild(option);
+        });
         typeSelect.value = category.type || "expense";
         typeSelect.onchange = () => {
             categories[index].type = typeSelect.value;
             renderCategories();
             calculateTotals();
         };
+        categoryEl.appendChild(title);
         categoryEl.appendChild(typeSelect);
 
-        // Rubriker för item fälten
+        // Kolumnrubriker
         const spanHeadlines = document.createElement("div");
-        spanHeadlines.id = "div-headlines";
-        const itemNameHeadline = document.createElement("h5");
-        itemNameHeadline.innerHTML = "Namn";
-        const itemExpectedHeadline = document.createElement("h5");
-        itemExpectedHeadline.innerHTML = "Förmodad";
-        const itemActualHeadline = document.createElement("h5");
-        itemActualHeadline.innerHTML = "Faktisk";
-        spanHeadlines.appendChild(itemNameHeadline);
-        spanHeadlines.appendChild(itemExpectedHeadline);
-        spanHeadlines.appendChild(itemActualHeadline);
+        category.columns.forEach((col, colIndex) => {
+            const colHeader = document.createElement("h5");
+            colHeader.textContent = col.name;
+            colHeader.contentEditable = true;
+            colHeader.onblur = () => {
+                col.name = colHeader.textContent.trim();
+                renderCategories();
+                calculateTotals();
+            };
+            spanHeadlines.appendChild(colHeader);
+        });
+        // Lägg till knappar för kolumner
+        const addColumnButton = document.createElement("button");
+        addColumnButton.textContent = "+ Kolumn";
+        addColumnButton.onclick = () => {
+            const newKey = `col_${Date.now()}`;
+            category.columns.push({ name: "Ny kolumn", key: newKey });
+            category.items.forEach(item => item[newKey] = 0);
+            renderCategories();
+            calculateTotals();
+        };
+        spanHeadlines.appendChild(addColumnButton);
+        categoryEl.appendChild(spanHeadlines);
 
-
-        //Skapa ul för items i en kategori
+        // Items
         const itemList = document.createElement("ul");
         category.items.forEach((item, itemIndex) => {
             const itemEl = document.createElement("li");
-            itemEl.classList.add("item");
+            category.columns.forEach(col => {
+                const input = document.createElement("input");
+                input.type = "number";
+                input.value = item[col.key] || 0;
+                input.onchange = () => {
+                    item[col.key] = parseFloat(input.value) || 0;
+                    renderCategories();
+                    calculateTotals();
+                };
+                itemEl.appendChild(input);
+            });
 
-            // Item namn
-            const itemName = document.createElement("input");
-            itemName.value = item.name;
-            itemName.id = "item-name";
-            itemName.placeholder = "Namn";
-            itemName.onchange = () => {
-                categories[index].items[itemIndex].name = itemName.value;
-                renderCategories();
-                calculateTotals();
-            };
+            // Totalsumma per kolumn som en "item"-rad
+            const totals = calculateCategoryTotals(category);
+            const totalsRow = document.createElement("li");
+            totalsRow.classList.add("item");
+            totalsRow.style.backgroundColor = "#f1f0f0d2"; // Visuell skillnad
 
-            // Prisfält förmodad
-            const itemExpected = document.createElement("input");
-            itemExpected.type = "number";
-            itemExpected.value = item.expected;
-            itemExpected.placeholder = "Förmodad";
-            itemExpected.onchange = () => {
-                const value = parseFloat(itemExpected.value) || 0;
-                categories[index].items[itemIndex].expected = value;
-                renderCategories();
-                calculateTotals();
-            };
+            const totalsName = document.createElement("input");
+            totalsName.value = "Summa";
+            totalsName.readOnly = true;
+            totalsName.style.fontWeight = "bold";
+            totalsRow.appendChild(totalsName);
 
-            // Prisfält faktisk
-            const itemActual = document.createElement("input");
-            itemActual.type = "number";
-            itemActual.value = item.actual;
-            itemActual.placeholder = "Faktisk";
-            itemActual.onchange = () => {
-                const value = parseFloat(itemActual.value) || 0;
-                categories[index].items[itemIndex].actual = value;
-                renderCategories();
-                calculateTotals();
-            };
+            category.columns.forEach(col => {
+                const colTotalInput = document.createElement("input");
+                colTotalInput.value = totals[col.key];
+                colTotalInput.readOnly = true;
+                colTotalInput.style.fontWeight = "bold";
+                colTotalInput.style.backgroundColor = "#a7e7d8d2"; // tydlig för kolumntotal
+                totalsRow.appendChild(colTotalInput);
+            });
 
-            // Ta bort Item knapp
+            itemList.appendChild(totalsRow);
+
+
+            // Ta bort item
             const deleteItemButton = document.createElement("button");
             deleteItemButton.textContent = "Ta bort";
             deleteItemButton.onclick = () => {
-                categories[index].items.splice(itemIndex, 1);
+                category.items.splice(itemIndex,1);
                 renderCategories();
                 calculateTotals();
             };
-
-            itemEl.append(itemName, itemExpected, itemActual, deleteItemButton);
+            itemEl.appendChild(deleteItemButton);
             itemList.appendChild(itemEl);
         });
+        categoryEl.appendChild(itemList);
 
-        // Visa totalsummor för kategorin
+        // Totals
         const totals = calculateCategoryTotals(category);
-        console.log('totals.totalExpected: ' + totals.totalExpected);
-        console.log('totals.totalActual: ' + totals.totalActual);
         const totalsDiv = document.createElement("div");
         totalsDiv.classList.add("category-totals");
-        totalsDiv.innerHTML = `
-            <strong>Total förmodad:</strong> ${totals.totalExpected} kr<br>
-            <strong>Total faktisk:</strong> ${totals.totalActual} kr
-        `;
+        totalsDiv.innerHTML = category.columns.map(col => `<strong>${col.name}:</strong> ${totals[col.key]} kr`).join("<br>");
+        categoryEl.appendChild(totalsDiv);
 
         // Lägg till ny item
         const addItemButton = document.createElement("button");
         addItemButton.textContent = "Lägg till rad";
-        addItemButton.onclick = async () => {
-            categories[index].items.push({ name: "", expected: 0, actual: 0 });
+        addItemButton.onclick = () => {
+            const newItem = {};
+            category.columns.forEach(col => newItem[col.key] = 0);
+            category.items.push(newItem);
             renderCategories();
             calculateTotals();
         };
-        
+        categoryEl.appendChild(addItemButton);
+
         // Ta bort kategori
         const deleteCategoryButton = document.createElement("button");
         deleteCategoryButton.textContent = "Ta bort kategori";
-        deleteCategoryButton.id = "delete-button";
         deleteCategoryButton.onclick = async () => {
-            const categoryId = categories[index].id;           
-            if (categoryId) {
-                await deleteCategoryFromFirestore(categoryId);
-            }
-            categories.splice(index, 1);
+            const categoryId = category.id;
+            if (categoryId) await deleteCategoryFromFirestore(categoryId);
+            categories.splice(index,1);
             renderCategories();
             calculateTotals();
-            if (!categoryId) {
-                console.warn("Kategori saknar ID och kan inte tas bort från Firestore.");
-            } 
         };
-
-        categoryEl.append(
-            title, 
-            spanHeadlines, 
-            itemList, 
-            totalsDiv,
-            addItemButton, 
-            deleteCategoryButton
-        );
+        categoryEl.appendChild(deleteCategoryButton);
 
         categoryList.appendChild(categoryEl);
     });
 };
 
-// Ladda kategorier vid start av app
+// Normalisera kategori ID
+const normalizeCategories = async () => {
+    categories.forEach(category => {
+        if (!category.id.startsWith("temp_")) console.log(`Kategori-ID verifierad: ${category.id}`);
+        else console.warn(`Kategori har ett temporärt ID: ${category.id}`);
+    });
+};
+
+// Ladda kategorier vid start
 const loadCategories = async () => {
     normalizeCategories();
     try {
         categories = await fetchCategoriesFromFirestore();
-        if (!categories.length) {
-            console.log("Inga kategorier hittades.");
-        }
         renderCategories();
         calculateTotals();
     } catch (error) {
@@ -328,29 +309,10 @@ const loadCategories = async () => {
     }
 };
 
-// Kontroll av lokala kategori id
-const normalizeCategories = async () => {
-    categories.forEach(category => {
-        if (!category.id.startsWith("temp_")) {
-            console.log(`Kategori-ID verifierad: ${category.id}`);
-        } else {
-            console.warn(`Kategori har ett temporärt ID: ${category.id}`);
-        }
-    });
-};
-
-
-// Inloggning (TODO: Byt till firebase Authentication)
-const validCredentials = { 
-    username: "Gradin2025", 
-    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
-};
-
-// Spara kategorier till Firestore
+// Spara kategorier
 const saveCategoriesToFirestore = async (categories) => {
     try {
         const categoriesCollection = collection(db, "categories");
-
         for (const category of categories) {
             if (category.id) {
                 const categoryDoc = doc(categoriesCollection, category.id);
@@ -360,6 +322,7 @@ const saveCategoriesToFirestore = async (categories) => {
                     type: category.type,
                     color: category.color,
                     items: category.items,
+                    columns: category.columns,
                     order: category.order
                 });
             } else {
@@ -373,8 +336,13 @@ const saveCategoriesToFirestore = async (categories) => {
     }
 };
 
+// Inloggning
+const validCredentials = { 
+    username: "Gradin2025", 
+    passwordHash: "3af6f058eab3ac8f451704880d405ad9"
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-    // Logga in
     const loginScreen = document.getElementById("login-screen");
     const appScreen = document.getElementById("app");
     const errorMessage = document.getElementById("error-message");
@@ -383,28 +351,26 @@ document.addEventListener("DOMContentLoaded", () => {
     loginButton.addEventListener("click", () => {
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
-    
         if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
             loginScreen.classList.add("hidden");
             appScreen.classList.remove("hidden");
             loadCategories();
-            renderCategories();
-            calculateTotals();
-        } else {
-            errorMessage.textContent = "Fel användarnamn eller lösenord.";
-        }
+        } else errorMessage.textContent = "Fel användarnamn eller lösenord.";
     });
 
-    // Addera kategorier
+    // Lägg till kategori
     const addCategoryButton = document.getElementById("add-category");
-    if (addCategoryButton) {
-    addCategoryButton.addEventListener("click", async () => {
+    if (addCategoryButton) addCategoryButton.addEventListener("click", async () => {
         const newCategoryRef = await addDoc(collection(db, "categories"), {
             name: "Ny kategori",
             color: "#f9f9f9",
             type: "expense",
             items: [],
-            order: categories.length + 1,
+            columns: [
+                { name: "Förmodad", key: "expected" },
+                { name: "Faktisk", key: "actual" }
+            ],
+            order: categories.length + 1
         });
         categories.push({
             id: newCategoryRef.id,
@@ -412,39 +378,27 @@ document.addEventListener("DOMContentLoaded", () => {
             color: "#f9f9f9",
             type: "expense",
             items: [],
-            order: categories.length + 1,
+            columns: [
+                { name: "Förmodad", key: "expected" },
+                { name: "Faktisk", key: "actual" }
+            ],
+            order: categories.length + 1
         });
         renderCategories();
         calculateTotals();
     });
-    } else {
-        console.error("Add category button not found!");
-    }
-    
-    /*if (addCategoryButton) {
-        addCategoryButton.addEventListener("click", () => {
-            categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [], order: categories.length + 1});
+
+    // Spara
+    const saveButton = document.getElementById("save-button");
+    if (saveButton) saveButton.addEventListener("click", async () => {
+        try {
+            await saveCategoriesToFirestore(categories);
             renderCategories();
             calculateTotals();
-        });
-    } */
-
-    // SPARA KNAPPEN
-    const saveButton = document.getElementById("save-button");
-    if (saveButton) {
-        saveButton.addEventListener("click", async () => {
-            try {
-                await saveCategoriesToFirestore(categories);
-                renderCategories();
-                calculateTotals();
-                alert("Kategorier sparade!");
-            } catch (error) {
-                console.error("Fel vid sparning:", error);
-                alert("Misslyckades att spara kategorier.");
-            }
-        });    
-    } else {
-        console.error("Save button not found!");
-    }
-
+            alert("Kategorier sparade!");
+        } catch (error) {
+            console.error("Fel vid sparning:", error);
+            alert("Misslyckades att spara kategorier.");
+        }
+    });
 });
