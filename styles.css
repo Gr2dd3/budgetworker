@@ -103,10 +103,12 @@ input {
     font-weight: bold;
     margin: 0;
     
+    /* Justerar texten åt höger */
     text-align: right; 
     
-    /* Justering för att centrera över siffrorna */
-    padding-right: 35%; 
+    /* SKARPT JUSTERAT: Ökad padding för att flytta rubriken 
+       långt åt vänster och centrera den bättre över siffrorna. */
+    padding-right: 50%; /* Ökat från 35% */
     
     cursor: text;
     white-space: nowrap;

@@ -67,6 +67,7 @@ const setTextContent = (id, text) => {
 };
 
 const calculateTotals = () => {
+    // VIKTIGT: Hämta de dynamiska kolumnnamnen
     const columnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
     
     // Totaler för de tre kolumnerna
@@ -95,34 +96,34 @@ const calculateTotals = () => {
     // Beräkna totalt budgetresultat
     const totalResult1 = totalIncome1 - totalExpense1;
     const totalResult2 = totalIncome2 - totalExpense2;
-    const totalResult3 = totalIncome3 - totalExpense3; // För den tredje kolumnen
+    const totalResult3 = totalIncome3 - totalExpense3; 
 
     // --- UPPDATERING AV DOM-ELEMENT (De tre summeringsblocken längst ner) ---
     
-    // Kolumn 1 (Förmodad/Expected) - Använder de nya ID:na från HTML-uppdateringen
+    // ***********************************************************************************
+    // UPPDATERAT: Sätter rubriken för blocket till det dynamiska kolumnnamnet
+    // ***********************************************************************************
+    setTextContent("col-block-1-title", columnNames[0]);
+    setTextContent("col-block-2-title", columnNames[1]);
+    setTextContent("col-block-3-title", columnNames[2]);
+    
+    // Kolumn 1 (Förmodad/Expected) 
     setTextContent("col1-income", `Inkomst: ${totalIncome1} kr`);
     setTextContent("col1-expense", `Utgift: ${totalExpense1} kr`);
-    setTextContent("total-expected", `${columnNames[0]} Totalt: ${totalResult1} kr`);
+    setTextContent("total-expected", `Totalt: ${totalResult1} kr`);
 
     // Kolumn 2 (Faktisk/Actual)
     setTextContent("col2-income", `Inkomst: ${totalIncome2} kr`);
     setTextContent("col2-expense", `Utgift: ${totalExpense2} kr`);
-    setTextContent("total-actual", `${columnNames[1]} Totalt: ${totalResult2} kr`);
+    setTextContent("total-actual", `Totalt: ${totalResult2} kr`);
 
     // Kolumn 3 (Extra/Dynamisk)
     setTextContent("col3-income", `Inkomst: ${totalIncome3} kr`);
     setTextContent("col3-expense", `Utgift: ${totalExpense3} kr`);
-    setTextContent("total-extra", `${columnNames[2]} Totalt: ${totalResult3} kr`);
-
-    // NY SUMMERING: Den tredje summeringen som summerar skillnaden (Faktisk - Förmodad)
-    setTextContent("total-difference", `Total skillnad (${columnNames[1]} - ${columnNames[0]}): ${totalResult2 - totalResult1} kr`);
-    
-    // --- Vi behåller de gamla totalbudget-ID:na men använder dem för den totala inkomsten/utgiften om nödvändigt ---
-    // (Dessa ID:n används inte längre i den nya totalsummans struktur, men behålls ifall de används någon annanstans)
-    setTextContent("total-budget-col1", `Totalt ${columnNames[0]}: ${totalIncome1 + totalExpense1} kr`);
-    setTextContent("total-budget-col2", `Totalt ${columnNames[1]}: ${totalIncome2 + totalExpense2} kr`);
-    setTextContent("total-budget-col3", `Totalt ${columnNames[2]}: ${totalIncome3 + totalExpense3} kr`);
+    setTextContent("total-extra", `Totalt: ${totalResult3} kr`);
 };
+
+// ... resten av din JS-fil är oförändrad ...
 
 // Räkna ut totalen för varje kategori (Denna funktion används inte längre i UI men behålls ifall den används internt)
 const calculateCategoryTotals = (category) => {
