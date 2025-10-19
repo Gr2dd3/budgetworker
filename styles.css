@@ -9,7 +9,7 @@ body {
 } 
 
 #login-screen, #app { 
-    max-width: 800px; 
+    max-width: 600px; 
     margin: auto; 
     background: #fff; 
     padding: 20px; 
@@ -18,8 +18,8 @@ body {
 } 
 
 button { 
-    margin-top: .2rem; 
-    padding: .4rem .6rem; 
+    margin-top: .05rem; 
+    padding: .2rem; 
     background-color: #10031c; 
     color: white; 
     border: none; 
@@ -32,18 +32,16 @@ button:hover {
 } 
 
 ul { 
-    padding: 0; 
-    margin: 0; 
-    list-style: none; 
+    padding: .5rem; 
 } 
 
 input { 
-    margin: 2px; 
-    padding: 4px; 
+    display: block; 
+    max-width: 20vw; /* Change item width here */ 
+    margin: 1px 1px; 
+    padding: 1px; 
     border: 1px solid #ccc; 
-    border-radius: 4px; 
-    width: 100%; 
-    box-sizing: border-box;
+    border-radius: 5px; 
 } 
 
 #category-list { 
@@ -52,91 +50,191 @@ input {
 } 
 
 .category { 
-    margin-bottom: 15px; 
-    padding: 10px; 
+    margin-bottom: 10px; 
+    padding: 5px; 
     border: 1px solid #ccc; 
     border-radius: 5px; 
     background-color: #f9f9f9; 
 } 
 
+#category-name { 
+    margin-top: 2rem; 
+} 
+
 .category h3 { 
-    margin: 0 0 10px 0; 
+    margin: 0; 
 } 
 
 .category-totals { 
-    margin: 5px 0; 
-    padding: 5px; 
+    margin: .2rem; 
+    padding: 3px; 
     background-color: #f0f0f0; 
     border-top: 1px solid #ccc; 
     font-size: 14px; 
 } 
 
+/* --- UPPDATERAD STIL FÖR DYNAMISKA KOLUMNRUBRIKER --- */
 #div-headlines { 
-    display: flex; 
-    gap: 5px; 
-    margin-bottom: 5px; 
+    display: grid;
+    /* Skapa 3 kolumner för de dynamiska rubrikerna */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 5px;
+    padding: 0 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+    align-items: center;
 } 
 
-#div-headlines:first-child {
-    margin-left: auto;
+#div-headlines h5 {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin: 0;
+    text-align: right;
+    padding-right: 5px;
+    cursor: text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-#div-headlines h5 { 
-    flex: 1; 
-    text-align: center; 
-    margin: 0; 
-    padding: 4px; 
-    background-color: #e0e0e0; 
-    border-radius: 4px; 
-    cursor: text;
+/* --- UPPDATERAD STIL FÖR ITEM-RADEN --- */
+.item { 
+    pointer-events: auto; 
+    user-select: none; 
+    display: flex; 
+    align-items: center; /* Justerad från 'justify-content: start' för bättre vertikal centrering */
+    gap: 5px; /* Lade till gap för bättre avstånd */
+    max-width: 95%; 
+    padding: 5px 0;
 } 
 
-.item { 
-    display: flex; 
-    gap: 5px; 
-    margin-bottom: 5px; 
+#item-name { 
+    /* Denna stil är kvar, men input[type="text"] styr nu bredden. */
+    min-width: 4rem; 
 } 
 
 .item input { 
-    flex: 1; 
+    max-width: auto; 
 } 
+
+.item input[type="text"] {
+    flex: 2; /* Namnfältet är bredast */
+    min-width: 100px;
+}
+
+.item input[type="number"] {
+    flex: 1; /* Sifferfälten får lika bredd */
+    text-align: right;
+    min-width: 50px;
+}
 
 #delete-button { 
-    margin-left: 5px; 
+    margin-left: 5rem; 
+    size: 110%; 
 } 
 
-.probTotal, .actuTotal { 
-    padding: 5px; 
-    margin: 5px 0; 
-    border-radius: 4px; 
-} 
+/* --- NY STIL FÖR TOTALSUMMERINGARNA LÄNGST NER (Ersätter .probTotal och .actuTotal) --- */
 
-.probTotal { 
-    border: 1px dashed black; 
-    background-color: #f1f0f0d2; 
-} 
+#totals {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
 
-.actuTotal { 
-    border: 2px solid black; 
-    background-color: #a7e7d8d2; 
-} 
+hr {
+    border: none;
+    border-top: 1px dashed #ccc;
+    margin: 10px 0;
+}
+
+/* De tre översta summeringsraderna (Total Budget Kolumn 1, 2, 3) */
+#total-summary-rows {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-style: dashed; 
+    border-color: black; 
+    border-width: 1px; 
+    padding: 2px; 
+    background-color: #f1f0f0d2; /* Bevarar stilen från gamla .probTotal */
+}
+
+#total-summary-rows p {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    color: #444;
+    padding: 0 5px;
+    font-size: 1em;
+}
+
+/* Budgetresultat (Inkomst - Utgift) för de tre kolumnerna */
+#budget-results {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    border-style: solid; 
+    border-color: black; 
+    border-width: 2px; 
+    padding: 2px; 
+    background-color: #a7e7d8d2; /* Bevarar stilen från gamla .actuTotal */
+}
+
+#budget-results h3 {
+    flex: 1;
+    text-align: center;
+    color: #007bff; 
+    font-size: 1.1em;
+    padding: 0 5px;
+}
+
+/* Den NYA TREDJE SUMMERINGEN: Total skillnad (Faktisk - Förmodad) */
+#final-difference {
+    text-align: center;
+    padding: 10px 0;
+}
+
+#total-difference {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #28a745; 
+    margin: 0;
+    padding: 5px 10px;
+    border: 2px solid #28a745;
+    display: inline-block;
+    border-radius: 5px;
+}
+
+
+/* --- MEDIA QUERIES --- */
 
 @media (min-width: 415px) { 
-    #div-headlines h5, .item input { 
-        width: auto;
+    input { 
+        max-width: 21vw; /* Change item width here */ 
     } 
-
-    #div-headlines {
-        margin: 0 2rem 0 4rem;
-    }
+    
+    #div-headlines { 
+        /* Marginalen är inte längre nödvändig med grid layout, men behålls om du vill justera avstånd */
+        /* margin-right: 25vw; */ 
+    } 
+    
+    ul { 
+        padding: 2%; 
+    } 
 } 
 
 @media (min-width: 660px) { 
-    #div-headlines h5, .item input { 
-        width: auto;
+    input { 
+        max-width: 34vw; /* Change item width here */ 
     } 
-
-    #div-headlines {
-        margin: 0 2rem 0 4rem;
-    }
-} 
+    
+    #div-headlines { 
+        /* margin-right: 100px; */ 
+    } 
+    
+    ul { 
+        padding: 2%; 
+    } 
+}

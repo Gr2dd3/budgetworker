@@ -29,10 +29,16 @@ const fetchCategoriesFromFirestore = async () => {
         return {
             id: doc.id,
             ...data,
+            // Läs in columnNames från Firestore, annars använd standardvärden
+            columnNames: Array.isArray(data.columnNames) && data.columnNames.length === 3
+                ? data.columnNames
+                : ["Förmodad", "Faktisk", "Extra"],
             items: Array.isArray(data.items) ? data.items.map(item => ({
                 name: item.name || "",
                 expected: parseFloat(item.expected) || 0,
-                actual: parseFloat(item.actual) || 0
+                actual: parseFloat(item.actual) || 0,
+                // Läs in 'extra' från Firestore, viktigt för den tredje kolumnen
+                extra: parseFloat(item.extra) || 0 
             })) : []
         };
     });
@@ -61,6 +67,9 @@ const setTextContent = (id, text) => {
 };
 
 const calculateTotals = () => {
+    // VIKTIG ÄNDRING: Uppdaterad för att använda dynamiska kolumnnamn
+    const columnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
+    
     let totalCol1 = 0; // motsvarar "expected"
     let totalCol2 = 0; // motsvarar "actual"
     let totalCol3 = 0; // motsvarar "extra"
@@ -74,9 +83,9 @@ const calculateTotals = () => {
     });
 
     // Uppdatera DOM
-    setTextContent("total-budget-col1", `Totalt ${categories[0]?.columnNames[0] || "Förmodad"}: ${totalCol1} kr`);
-    setTextContent("total-budget-col2", `Totalt ${categories[0]?.columnNames[1] || "Faktisk"}: ${totalCol2} kr`);
-    setTextContent("total-budget-col3", `Totalt ${categories[0]?.columnNames[2] || "Extra"}: ${totalCol3} kr`);
+    setTextContent("total-budget-col1", `Totalt ${columnNames[0]}: ${totalCol1} kr`);
+    setTextContent("total-budget-col2", `Totalt ${columnNames[1]}: ${totalCol2} kr`);
+    setTextContent("total-budget-col3", `Totalt ${columnNames[2]}: ${totalCol3} kr`);
 
     // Om du vill visa "budgetresultat" som tidigare (inkomst - utgift)
     let totalIncome1 = 0, totalExpense1 = 0;
@@ -97,9 +106,13 @@ const calculateTotals = () => {
         });
     });
 
-    setTextContent("total-expected", `Budgetresultat (${categories[0]?.columnNames[0] || "Förmodad"}): ${totalIncome1 - totalExpense1} kr`);
-    setTextContent("total-actual", `Budgetresultat (${categories[0]?.columnNames[1] || "Faktisk"}): ${totalIncome2 - totalExpense2} kr`);
-    setTextContent("total-extra", `Budgetresultat (${categories[0]?.columnNames[2] || "Extra"}): ${totalIncome3 - totalExpense3} kr`);
+    setTextContent("total-expected", `Budgetresultat (${columnNames[0]}): ${totalIncome1 - totalExpense1} kr`);
+    setTextContent("total-actual", `Budgetresultat (${columnNames[1]}): ${totalIncome2 - totalExpense2} kr`);
+    setTextContent("total-extra", `Budgetresultat (${columnNames[2]}): ${totalIncome3 - totalExpense3} kr`);
+    
+    // NY SUMMERING: Den tredje summeringen som summerar den tredje kolumnen
+    // Vi använder ett nytt ID: total-difference (motsvarar de gamla total-budget-elementen som nu har de nya namnen)
+    setTextContent("total-difference", `Total skillnad (${columnNames[1]} - ${columnNames[0]}): ${totalCol2 - totalCol1} kr`);
 };
 
 // Räkna ut totalen för varje kategori
@@ -129,11 +142,14 @@ const renderCategories = () => {
     if (!categories || categories.length === 0) {
         categoryList.innerHTML = "<p>Inga kategorier att visa</p>";
         return;
-    }    
+    }    
+    
+    // VIKTIG ÄNDRING: Hämta de nuvarande kolumnnamnen för enhetlighet
+    const currentColumnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
 
     categories.forEach((category, index) => {
-        // Säkerställ att kolumnnamn finns
-        category.columnNames = category.columnNames || ["Förmodad", "Faktisk", "Extra"];
+        // Säkerställ att kolumnnamn finns och är enhetliga
+        category.columnNames = currentColumnNames;
 
         // Skapa kategori-element
         const categoryEl = document.createElement("li");
@@ -147,6 +163,8 @@ const renderCategories = () => {
         colorInput.onchange = () => {
             categories[index].color = colorInput.value;
             categoryEl.style.backgroundColor = colorInput.value;
+            // Ingen renderCategories här, det görs vid sparning
+            // Men i ditt original anropades det:
             renderCategories();
             calculateTotals();
         };
@@ -210,8 +228,14 @@ const renderCategories = () => {
             colHeadline.onblur = () => {
                 const newName = colHeadline.textContent.trim();
                 if (newName) {
-                    categories[index].columnNames[colIndex] = newName;
-                    renderCategories();
+                    // VIKTIG ÄNDRING: Uppdatera kolumnnamn på ALLA kategorier 
+                    categories.forEach(cat => {
+                        cat.columnNames = cat.columnNames || ["Förmodad", "Faktisk", "Extra"];
+                        cat.columnNames[colIndex] = newName;
+                    });
+
+                    renderCategories(); // Rendera om alla kategorier
+                    calculateTotals(); // Uppdatera totaler
                 } else {
                     colHeadline.textContent = categories[index].columnNames[colIndex];
                 }
@@ -308,9 +332,16 @@ const renderCategories = () => {
 
 // Ladda kategorier vid start av app
 const loadCategories = async () => {
-    normalizeCategories();
+    // normalizeCategories(); 
     try {
         categories = await fetchCategoriesFromFirestore();
+        if (categories.length > 0) {
+            // VIKTIG ÄNDRING: Sätt samma kolumnnamn på alla kategorier vid laddning 
+            // för att säkerställa enhetlighet i UI:t.
+            const names = categories[0].columnNames;
+            categories.forEach(cat => cat.columnNames = names);
+        }
+        
         if (!categories.length) {
             console.log("Inga kategorier hittades.");
         }
@@ -345,19 +376,32 @@ const saveCategoriesToFirestore = async (categories) => {
     try {
         const categoriesCollection = collection(db, "categories");
 
+        // VIKTIG ÄNDRING: Hämta de nuvarande kolumnnamnen från den första kategorin
+        const columnNamesToSave = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
+
         for (const category of categories) {
+            
+            const dataToSave = {
+                name: category.name,
+                type: category.type,
+                color: category.color,
+                items: category.items.map(item => ({ // Se till att items är serialiserbara
+                    name: item.name,
+                    expected: parseFloat(item.expected) || 0,
+                    actual: parseFloat(item.actual) || 0,
+                    extra: parseFloat(item.extra) || 0,
+                })),
+                order: category.order,
+                columnNames: columnNamesToSave // Inkludera de dynamiska rubrikerna i databasen
+            };
+
             if (category.id) {
                 const categoryDoc = doc(categoriesCollection, category.id);
-                await updateDoc(categoryDoc, {
-                    id: category.id,
-                    name: category.name,
-                    type: category.type,
-                    color: category.color,
-                    items: category.items,
-                    order: category.order
-                });
+                // Använd updateDoc
+                await updateDoc(categoryDoc, dataToSave); 
             } else {
-                const newCategoryRef = await addDoc(categoriesCollection, category);
+                // Använd addDoc
+                const newCategoryRef = await addDoc(categoriesCollection, dataToSave);
                 category.id = newCategoryRef.id;
             }
         }
@@ -392,37 +436,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // Addera kategorier
     const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
-    addCategoryButton.addEventListener("click", async () => {
-        const newCategoryRef = await addDoc(collection(db, "categories"), {
-            name: "Ny kategori",
-            color: "#f9f9f9",
-            type: "expense",
-            items: [],
-            order: categories.length + 1,
+        addCategoryButton.addEventListener("click", async () => {
+            // VIKTIG ÄNDRING: Hämta de aktuella kolumnnamnen från en befintlig kategori, annars standard
+            const currentColumnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
+
+            const newCategoryData = {
+                name: "Ny kategori",
+                color: "#f9f9f9",
+                type: "expense",
+                items: [],
+                order: categories.length + 1,
+                columnNames: currentColumnNames, // Lägg till kolumnnamnen här
+            };
+            
+            const newCategoryRef = await addDoc(collection(db, "categories"), newCategoryData);
+            
+            // Pusha till den lokala arrayen med det nya ID:t och datan
+            categories.push({
+                id: newCategoryRef.id,
+                ...newCategoryData
+            });
+            
+            renderCategories();
+            calculateTotals();
         });
-        categories.push({
-            id: newCategoryRef.id,
-            name: "Ny kategori",
-            color: "#f9f9f9",
-            type: "expense",
-            items: [],
-            order: categories.length + 1,
-        });
-        renderCategories();
-        calculateTotals();
-    });
     } else {
         console.error("Add category button not found!");
     }
     
-    /*if (addCategoryButton) {
-        addCategoryButton.addEventListener("click", () => {
-            categories.push({ name: "Ny kategori", color: "#f9f9f9", type: "expense", items: [], order: categories.length + 1});
-            renderCategories();
-            calculateTotals();
-        });
-    } */
-
     // SPARA KNAPPEN
     const saveButton = document.getElementById("save-button");
     if (saveButton) {
@@ -436,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Fel vid sparning:", error);
                 alert("Misslyckades att spara kategorier.");
             }
-        });    
+        });    
     } else {
         console.error("Save button not found!");
     }

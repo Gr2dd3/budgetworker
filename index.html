@@ -1,89 +1,53 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Budget App</title>
-
     <link rel="stylesheet" href="styles.css">
 
-
-
-    <!-- Lägg till CryptoJS via CDN -->
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
 </head>
-
 <body>
-
     <div id="login-screen">
-
         <h1>Login</h1>
-
         <input type="text" id="username" placeholder="Användarnamn" autocomplete="username">
-
         <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password">
-
         <button id="login-button">Logga in</button>
-
         <p id="error-message" style="color:red;"></p>
-
     </div>
-
-
 
     <div id="app" class="hidden">
-
         <h2>Budget</h2>
-
         <div id="budget">
-
             <ul id="category-list"></ul>
-
             <button id="add-category">Lägg till kategori</button>
-
             <button id="save-button">Spara ändringar</button>
-
         </div>
-
+        
         <div id="totals">
-
-            <div class="probTotal">
-
-                <h4 id="total-budget-expected-income">Total inkomst: 0</h4>
-
-                <h4 id="total-budget-expected-expense">Total utgift: 0</h4>
-
-                <h3 id="total-expected">Total budget: 0</h3>
-
+            <div id="total-summary-rows">
+                <p id="total-budget-col1">Totala summering 1: 0 kr</p>
+                <p id="total-budget-col2">Totala summering 2: 0 kr</p>
+                <p id="total-budget-col3">Totala summering 3: 0 kr</p>
             </div>
 
-            <div class="actuTotal">
+            <hr>
 
-                <h5 id="total-budget-actual-income">Total inkomst: 0</h5>
-
-                <h5 id="total-budget-actual-expense">Total utgift: 0</h5>
-
-                <h3 id="total-actual">Total budget: 0</h3>
-
+            <div id="budget-results">
+                <h3 id="total-expected">Budgetresultat (Förmodad): 0 kr</h3>
+                <h3 id="total-actual">Budgetresultat (Faktisk): 0 kr</h3>
+                <h3 id="total-extra">Budgetresultat (Extra): 0 kr</h3>
             </div>
+            
+            <hr>
 
+            <div id="final-difference">
+                <h3 id="total-difference">Total skillnad: 0 kr</h3>
+            </div>
         </div>
-
-       
-
-    </div>
-
-
+        </div>
 
     <script src="dist/bundle.js"></script>
-
 </body>
-
 </html>
