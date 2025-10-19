@@ -100,26 +100,27 @@ const calculateTotals = () => {
 
     // --- UPPDATERING AV DOM-ELEMENT (De tre summeringsblocken längst ner) ---
     
-    // ***********************************************************************************
-    // UPPDATERAT: Sätter rubriken för blocket till det dynamiska kolumnnamnet
-    // ***********************************************************************************
+    // Sätter den STORA RUBRIKEN på blocket till det dynamiska namnet (t.ex. Oktober)
     setTextContent("col-block-1-title", columnNames[0]);
     setTextContent("col-block-2-title", columnNames[1]);
     setTextContent("col-block-3-title", columnNames[2]);
     
-    // Kolumn 1 (Förmodad/Expected) 
+    // Kolumn 1
     setTextContent("col1-income", `Inkomst: ${totalIncome1} kr`);
     setTextContent("col1-expense", `Utgift: ${totalExpense1} kr`);
-    setTextContent("total-expected", `Totalt: ${totalResult1} kr`);
+    // Nu endast statisk text: "Totalt:"
+    setTextContent("total-expected", `Totalt: ${totalResult1} kr`); 
 
-    // Kolumn 2 (Faktisk/Actual)
+    // Kolumn 2
     setTextContent("col2-income", `Inkomst: ${totalIncome2} kr`);
     setTextContent("col2-expense", `Utgift: ${totalExpense2} kr`);
-    setTextContent("total-actual", `Totalt: ${totalResult2} kr`);
+    // Nu endast statisk text: "Totalt:"
+    setTextContent("total-actual", `Totalt: ${totalResult2} kr`); 
 
-    // Kolumn 3 (Extra/Dynamisk)
+    // Kolumn 3
     setTextContent("col3-income", `Inkomst: ${totalIncome3} kr`);
     setTextContent("col3-expense", `Utgift: ${totalExpense3} kr`);
+    // Nu endast statisk text: "Totalt:"
     setTextContent("total-extra", `Totalt: ${totalResult3} kr`);
 };
 

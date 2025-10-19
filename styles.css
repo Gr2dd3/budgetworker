@@ -65,13 +65,13 @@ input {
     margin: 0; 
 } 
 
-.category-totals { 
+/*.category-totals { 
     margin: .2rem; 
     padding: 3px; 
     background-color: #f0f0f0; 
     border-top: 1px solid #ccc; 
     font-size: 14px; 
-} 
+} */
 
 
 /* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT V3) --- */
@@ -103,12 +103,10 @@ input {
     font-weight: bold;
     margin: 0;
     
-    /* Justerar texten åt höger */
     text-align: right; 
     
-    /* SKARPT JUSTERAT: Ökad padding för att flytta rubriken 
-       långt åt vänster och centrera den bättre över siffrorna. */
-    padding-right: 50%; /* Ökat från 35% */
+    /* SKARPT JUSTERAT: Flyttar texten ännu längre åt vänster */
+    padding-right: 80%; /* Ökat från 50% */
     
     cursor: text;
     white-space: nowrap;
