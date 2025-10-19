@@ -1,167 +1,151 @@
-/* --- Ny CSS för Dynamiska Kolumner --- */
+body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    background-color: #f4f4f4; 
+} 
+    
+.hidden { 
+    display: none; 
+} 
 
-/* Wrapper för att tillåta horisontell scrollning */
-#category-list-wrapper {
-    overflow-x: auto; /* Tillåter horisontell scroll */
-    padding-bottom: 20px; /* Utrymme för scrollbar */
-}
+#login-screen, #app { 
+    max-width: 600px; 
+    margin: auto; 
+    background: #fff; 
+    padding: 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+} 
 
-/* Fixera kolumnrubriker (sticky header) */
-#column-headlines-container {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: #fff; /* Bakgrundsfärg för att dölja scrollande innehåll */
-    border-bottom: 2px solid #333;
-    padding: 5px 0;
-    margin-bottom: 5px;
-}
+button { 
+    margin-top: .05rem; 
+    padding: .2rem; 
+    background-color: #10031c; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+} 
 
-#dynamic-headlines, .item, .category-totals {
-    display: grid;
-    /* Denna grid definierar kolumnerna: Namn + Dynamiska Kolumner + RadTotal */
-    /* Använd en min-bredd för inputs för att säkerställa att de inte blir för små */
-    grid-template-columns: 
-        minmax(100px, 1fr) /* Radnamn */
-        repeat(auto-fit, minmax(80px, 1fr)) /* Dynamiska kolumner */
-        minmax(70px, auto) /* Radens total/Delete-knapp */
-        minmax(80px, auto); /* Sista kolumnen */
-    gap: 5px;
-    align-items: center;
-    min-width: 800px; /* Minsta bredd för scrollning, justera efter behov */
-}
+button:hover { 
+    background-color: gray; 
+} 
 
-#dynamic-headlines h5 {
-    white-space: nowrap; /* Förhindra radbrytning */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 0 5px;
-    margin: 0;
-}
+ul { 
+    padding: .5rem; 
+} 
 
-/* Styla rubrikfältet */
-.column-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.column-header input {
-    max-width: 100%;
-    margin-bottom: 2px;
-}
-.delete-column-btn {
-    padding: 2px 5px;
-    font-size: 10px;
-}
+input { 
+    display: block; 
+    max-width: 20vw; /* Change item width here */ 
+    margin: 1px 1px; 
+    padding: 1px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+} 
 
-/* Styla raderna (items) */
-.dynamic-item input[type="number"] {
-    max-width: 100%;
-    text-align: right;
-}
-.item-row-total {
-    text-align: right;
-    font-weight: bold;
-}
-.delete-item-btn {
-    margin: 0; /* Ta bort onödig marginal */
-}
+#category-list { 
+    list-style: none; 
+    padding: 0; 
+} 
 
-/* Styla kategorins totalrader */
-.category-totals.dynamic-totals {
-    border-top: 1px solid #ccc;
-    font-size: 14px;
-    padding: 5px 0;
-    margin: 5px 0;
-}
-.spacer-for-name {
-    /* Måste matcha bredden på Namn-kolumnen */
-    min-width: 100px;
-    grid-column: 1 / 2;
-}
-.column-total-value {
-    text-align: right;
-    font-weight: normal;
-}
-.category-grand-total {
-    text-align: right;
-    font-weight: bold;
-}
+.category { 
+    margin-bottom: 10px; 
+    padding: 5px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    background-color: #f9f9f9; 
+} 
 
+#category-name { 
+    margin-top: 2rem; 
+} 
 
-/* Global Kolumntotal längst ner */
-#grand-column-totals {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-}
+.category h3 { 
+    margin: 0; 
+} 
 
-.column-totals-wrapper {
-    display: flex;
-    min-width: 800px; /* Måste matcha bredden på #dynamic-headlines */
-    margin-left: 5px; /* Kompensera för den borttagna Namn-kolumnen */
-}
+.category-totals { 
+    margin: .2rem; 
+    padding: 3px; 
+    background-color: #f0f0f0; 
+    border-top: 1px solid #ccc; 
+    font-size: 14px; 
+} 
 
-.column-totals-labels {
-    /* Ger samma utrymme som Radnamn + första dynamiska kolumnen */
-    min-width: 100px; /* Motsvarar Namn-kolumnen */
-    margin-right: 5px; /* Gap-storlek */
-    display: flex;
-    flex-direction: column;
-    font-weight: bold;
-    text-align: right;
-    padding-right: 5px;
-}
+#div-headlines { 
+    display: flex; 
+    flex-direction: row; 
+    justify-content: space-around; 
+    margin: 0 60px 0 0; 
+    padding: 0; 
+} 
 
-.column-total-box {
-    display: flex;
-    flex-direction: column;
-    min-width: 80px; /* Motsvarar dynamisk kolumnbredd */
-    margin-right: 5px; /* Gap-storlek */
-    text-align: right;
-    padding-right: 5px;
-}
-.grand-total-difference {
-    font-weight: bold;
-    border-top: 1px solid #333;
-    padding-top: 2px;
-}
+.item { 
+    pointer-events: auto; 
+    user-select: none; 
+    display: flex; 
+    justify-content: start; 
+    max-width: 95%; 
+} 
 
-/* Uppdatera befintlig CSS för att ta bort de gamla rubrikerna */
-#div-headlines {
-    display: none; /* Dölj gamla rubriker */
-}
+#item-name { 
+    min-width: 4rem; 
+} 
 
-/* --- Justeringar av Original CSS --- */
-/* Justera befintliga regler för att undvika konflikter med de dynamiska kolumnerna */
+.item input { 
+    max-width: auto; 
+} 
 
-/* Uppdatera .item för att använda grid istället för flex (om det behövs) */
-.item {
-    /* Dina ursprungliga stilar behålls, men med grid-layouten ovan */
-    pointer-events: auto;
-    user-select: none;
-    max-width: 100%; /* Sätt till 100% för att fylla scroll-containern */
-}
-#item-name {
-    max-width: 100%; /* Låt grid hantera bredden */
-}
+#delete-button { 
+    margin-left: 5rem; 
+    size: 110%; 
+} 
 
-/* Ta bort de gamla total-elementen, eftersom de ersätts av #grand-column-totals */
-#total-budget-expected-income,
-#total-budget-expected-expense,
-#total-expected,
-#total-budget-actual-income,
-#total-budget-actual-expense,
-#total-actual {
-    display: none;
-}
-/* Behåll de nya total-elementen synliga (lägg till dessa id:n i HTML:en) */
-#total-budget-income,
-#total-budget-expense,
-#total-budget-overall {
-    /* Stil för den nya globala totalsumman (om du vill ha den kvar) */
-    font-size: 1.2em;
-    font-weight: bold;
-    margin: 5px 0;
+.probTotal { 
+    display: block; 
+    display: block; 
+    border-style: dashed; 
+    border-color: black; 
+    border-width: 1px; 
+    padding: 2px; 
+    margin: 1rem 0; 
+    background-color: #f1f0f0d2; 
+} 
+
+.actuTotal { 
+    display: block; 
+    border-style: solid; 
+    border-color: black; 
+    border-width: 2px; 
+    padding: 2px; 
+    background-color: #a7e7d8d2; 
+} 
+
+@media (min-width: 415px) { 
+    input { 
+        max-width: 21vw; /* Change item width here */ 
+    } 
+    
+    #div-headlines { 
+        margin-right: 25vw; 
+    } 
+    
+    ul { 
+        padding: 2%; 
+    } 
+} 
+
+@media (min-width: 660px) { 
+    input { 
+        max-width: 34vw; /* Change item width here */ 
+    } 
+    
+    #div-headlines { 
+        margin-right: 100px; 
+    } 
+    
+    ul { 
+        padding: 2%; 
+    } 
 }

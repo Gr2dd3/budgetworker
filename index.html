@@ -1,49 +1,89 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Budget App</title>
+
     <link rel="stylesheet" href="styles.css">
 
+
+
+    <!-- Lägg till CryptoJS via CDN -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
 </head>
+
 <body>
+
     <div id="login-screen">
+
         <h1>Login</h1>
+
         <input type="text" id="username" placeholder="Användarnamn" autocomplete="username">
+
         <input type="password" id="password" placeholder="Lösenord" autocomplete="current-password">
+
         <button id="login-button">Logga in</button>
+
         <p id="error-message" style="color:red;"></p>
+
     </div>
+
+
 
     <div id="app" class="hidden">
+
         <h2>Budget</h2>
-        
-        <button id="add-column-button">+ Lägg till kolumn</button>
-        
-        <div id="totals">
-            <div class="probTotal">
-                <h4 id="total-budget-income">Total inkomst: 0 kr</h4> <h4 id="total-budget-expense">Total utgift: 0 kr</h4> <h3 id="total-budget-overall">Total budget: 0 kr</h3> </div>
-            <div class="actuTotal">
-                </div>
-        </div>
-        
+
         <div id="budget">
-            <div id="category-list-wrapper">
-                
-                <div id="column-headlines-container"></div>
-                
-                <ul id="category-list"></ul>
-                
-                <div id="grand-column-totals"></div>
-            </div>
+
+            <ul id="category-list"></ul>
+
             <button id="add-category">Lägg till kategori</button>
+
             <button id="save-button">Spara ändringar</button>
+
         </div>
-        
+
+        <div id="totals">
+
+            <div class="probTotal">
+
+                <h4 id="total-budget-expected-income">Total inkomst: 0</h4>
+
+                <h4 id="total-budget-expected-expense">Total utgift: 0</h4>
+
+                <h3 id="total-expected">Total budget: 0</h3>
+
+            </div>
+
+            <div class="actuTotal">
+
+                <h5 id="total-budget-actual-income">Total inkomst: 0</h5>
+
+                <h5 id="total-budget-actual-expense">Total utgift: 0</h5>
+
+                <h3 id="total-actual">Total budget: 0</h3>
+
+            </div>
+
+        </div>
+
+       
+
     </div>
 
+
+
     <script src="dist/bundle.js"></script>
+
 </body>
+
 </html>
