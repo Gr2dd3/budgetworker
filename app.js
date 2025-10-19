@@ -299,7 +299,6 @@ const renderCategories = () => {
         });
         categoryEl.appendChild(itemList);
 
-        // !!! BORTTAGEN KOD: Den oönskade summeringen i kategorin !!!
         /*
         const totalsDiv = document.createElement("div");
         totalsDiv.classList.add("category-totals");
