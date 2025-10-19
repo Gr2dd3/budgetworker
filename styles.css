@@ -101,12 +101,12 @@ input {
 #div-headlines h5 {
     font-size: 0.9em;
     font-weight: bold;
-    margin: 0;
+    margin: 0 2rem 0 0;
     
     text-align: right; 
     
     /* SKARPT JUSTERAT: Flyttar texten ännu längre åt vänster */
-    padding-right: 80%; /* Ökat från 50% */
+    padding-right: 40%; /* Ökat från 50% */
     
     cursor: text;
     white-space: nowrap;
