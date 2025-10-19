@@ -370,7 +370,6 @@ const normalizeCategories = async () => {
     });
 };
 
-
 // Inloggning (TODO: Byt till firebase Authentication)
 const validCredentials = { 
     username: "Gradin2025", 
