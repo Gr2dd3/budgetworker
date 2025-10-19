@@ -73,42 +73,85 @@ input {
     font-size: 14px; 
 } 
 
-/* --- DYNAMISKA KOLUMNRUBRIKER (UPPDATERAD LAYOUT) --- */
+/* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT) --- */
 #div-headlines { 
     display: grid;
-    /* Skapar 5 kolumner: 
-       1: Över Namn-input (tom)
-       2-4: Över siffer-inputs (1fr, 1fr, 1fr)
-       5: Över Ta bort-knapp (tom) 
-    */
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr; /* 2fr för namn, 1fr för de 4 andra elementen */
+    /* VIKTIGT: Måste matcha layoutelementen i .item-raden (Namn, Input1, Input2, Input3, Ta bort) */
+    /* Använder samma proportioner som inputfälten nedan (flex: 2 och flex: 1, samt Ta Bort-knappen) */
+    grid-template-columns: 2fr 1fr 1fr 1fr auto; /* Använder 'auto' för att Ta Bort-knappen ska bestämma bredd */
     gap: 5px;
     padding: 0 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
     align-items: center;
 } 
-/* Flyttar rubrikerna så att de börjar i den andra kolumnen (över expected/förmodad) */
-#div-headlines h5:nth-child(1) {
-    grid-column: 2;
-}
-#div-headlines h5:nth-child(2) {
-    grid-column: 3;
-}
-#div-headlines h5:nth-child(3) {
-    grid-column: 4;
-}
 
+/* Stilar för varje individuell rubrik */
 #div-headlines h5 {
     font-size: 0.9em;
     font-weight: bold;
     margin: 0;
-    text-align: center; /* <-- Ändrad till CENTER för bättre balans! */
-    padding: 0; /* Tar bort padding-right */
+    
+    /* Justering som flyttar rubriken till höger i sin cell, 
+       men drar den inåt för att vara mer centrerad över inputfälten */
+    text-align: right; 
+    padding-right: 5px; 
+    
+    /* Lägger till en liten negativ marginal för att dra rubriken lite åt vänster, 
+       vilket simulerar att den är smalare än grid-kolumnen, 
+       och centrerar den över de smalare inputfälten. */
+    /* margin-right: 5px; */ /* En liten marginal på höger sida */
+    
     cursor: text;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
+#div-headlines h5:nth-child(1) {
+    grid-column: 2;
+    /* Justering: Dra rubriken åt höger i sin kolumn och lägg till lite luft */
+    text-align: right;
+    padding-right: 15%; /* Drar in texten från högerkanten */
+}
+#div-headlines h5:nth-child(2) {
+    grid-column: 3;
+    text-align: right;
+    padding-right: 15%;
+}
+#div-headlines h5:nth-child(3) {
+    grid-column: 4;
+    text-align: right;
+    padding-right: 15%;
+}
+/* Den femte kolumnen (Ta bort) lämnas tom */
+
+
+/* --- VIKTIGT: Anpassa item-raden för att matcha rubrik-gridet --- */
+.item { 
+    /* ... befintliga stilar ... */
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    max-width: 95%; 
+    padding: 5px 0;
+} 
+/* Dessa flex-proportioner måste matcha grid-kolumnerna: 2fr 1fr 1fr 1fr auto */
+.item input[type="text"] {
+    flex: 2; /* 2fr */
+    min-width: 100px;
+}
+
+.item input[type="number"] {
+    flex: 1; /* 1fr */
+    text-align: right;
+    min-width: 50px;
+}
+
+.item button {
+    /* Auto/1fr: Ta bort-knappen måste ha sin egen bredd */
+    margin: 0;
 }
 
 /* --- UPPDATERAD STIL FÖR ITEM-RADEN --- */
