@@ -1,232 +1,161 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f4f4f4;
+/* GLOBAL CONTROLS (top) */
+.global-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
 }
-
-.hidden {
-    display: none;
-}
-
-#login-screen, #app {
-    max-width: 600px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-button {
-    margin-top: .05rem;
-    padding: .2rem;
+.add-col-btn-global, .remove-col-btn-global {
     background-color: #10031c;
     color: white;
     border: none;
+    padding: 6px 8px;
     border-radius: 5px;
     cursor: pointer;
 }
-
-button:hover {
+.add-col-btn-global:hover, .remove-col-btn-global:hover {
     background-color: gray;
 }
-
-ul {
-    padding: .5rem;
+.save-hint {
+    font-size: 12px;
+    color: #333;
+    margin-left: 8px;
 }
 
-input {
-    display: block;
-    max-width: 20vw; /* Change item width here */
-    margin: 1px 1px;
-    padding: 1px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Sticky header for columns */
+.columns-header {
+    position: sticky;
+    top: 10px; /* sits slightly below top so login/app header not overlapped */
+    z-index: 10;
+    background: transparent;
+    padding: 4px 0;
 }
-
-#category-list {
-    list-style: none;
-    padding: 0;
-}
-
-.category {
-    margin-bottom: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-#category-name {
-    margin-top: 2rem;
-}
-
-.category h3 {
-    margin: 0;
-}
-
-.category-totals {
-    margin: .2rem;
-    padding: 3px;
-    background-color: #f0f0f0;
-    border-top: 1px solid #ccc;
-    font-size: 14px;
-}
-
-#div-headlines {
+.columns-header-inner {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    margin: 0 60px 0 0;
-    padding: 0;
-}
-
-.item {
-    pointer-events: auto;
-    user-select: none;
-    display: flex;
-    justify-content: start;
-    max-width: 95%;
-}
-
-#item-name {
-    min-width: 4rem;
-}
-
-.item input {
-    max-width: auto;
-}
-
-#delete-button {
-    margin-left: 5rem;
-    size: 110%;
-}
-
-.probTotal {
-    display: block;
-    display: block;
-    border-style: dashed;
-    border-color: black;
-    border-width: 1px;
-    padding: 2px;
-    margin: 1rem 0;
-    background-color: #f1f0f0d2;
-}
-
-.actuTotal {
-    display: block;
-    border-style: solid;
-    border-color: black;
-    border-width: 2px;
-    padding: 2px;
-    background-color: #a7e7d8d2;
-}
-
-/* Wrapper för kolumnrubrik + delete-knapp */
-.column-headers {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-}
-
-.col-header-wrapper {
-    display: flex;
+    gap: 8px;
     align-items: center;
-    margin-right: 10px;
-    margin-bottom: 4px;
-    background-color: #e0e0e0;
-    padding: 2px 4px;
-    border-radius: 5px;
+    overflow-x: auto;
+    padding: 4px 0;
 }
 
-/* Kolumnnamn editable */
-.col-header-wrapper h5 {
-    margin: 0;
-    padding: 0 4px;
+/* Placeholder for left column (row names) */
+.col-name-placeholder {
+    min-width: 120px;
+}
+
+/* Each column header item */
+.col-header-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e0e0e0;
+    padding: 4px;
+    border-radius: 6px;
+    min-width: 90px;
+}
+.col-name-input {
     font-size: 14px;
-    min-width: 50px;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    min-width: 60px;
 }
-.col-header-wrapper h5:focus {
-    outline: none;
-    border-bottom: 1px dashed #10031c;
-}
-
-/* Ta bort kolumn-knapp */
-.delete-col-btn {
-    background-color: #ff4d4d;
+.col-delete-btn {
+    background: #ff4d4d;
     color: white;
     border: none;
     border-radius: 3px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
-    font-weight: bold;
+}
+
+/* Categories and rows */
+.category {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.category-ctrl-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.row-name-input {
+    min-width: 120px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 6px;
+}
+.item-list {
     padding: 0;
-    margin-left: 2px;
+    margin: 0 0 8px 0;
 }
-.delete-col-btn:hover {
-    background-color: #e60000;
-}
-
-.item input[readonly] {
-    cursor: default;
-    background-color: #a7e7d8d2; /* kan justeras */
-    font-weight: bold;
+.item-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
 }
 
-/* Lägg till kolumn-knapp */
-.add-col-btn {
+/* Numeric cell inputs (columns) - compact for mobile */
+.cell-input {
+    width: 80px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Buttons per row/category */
+.delete-item-btn, .add-row-btn, .delete-category-btn {
     background-color: #10031c;
     color: white;
     border: none;
-    padding: 2px 6px;
-    margin-left: 4px;
+    padding: 6px 8px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
 }
-.add-col-btn:hover {
+.delete-item-btn:hover, .add-row-btn:hover, .delete-category-btn:hover {
     background-color: gray;
 }
 
-/* Inputs för items i kolumner */
-.item input {
-    max-width: 10vw; /* eller justera efter behov */
-    margin-right: 2px;
-    margin-bottom: 2px;
-}
-
-/* Anpassa totalsummor */
-.category-totals {
+/* Totals row below all categories */
+.global-totals {
     display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
+    align-items: center;
+    padding: 6px;
+    border-top: 2px solid #ccc;
+    margin-top: 10px;
+    background: #fafafa;
 }
-.category-totals strong {
-    margin-right: 4px;
-}
-
-
-@media (min-width: 415px) {
-        input {
-            max-width: 21vw; /* Change item width here */
-        }
-        #div-headlines {
-            margin-right: 25vw;
-        }
-        ul {
-            padding: 2%;
-        }
+.total-cell {
+    width: 80px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #a7e7d8d2;
+    font-weight: bold;
 }
 
-@media (min-width: 660px) {
-        input {
-            max-width: 34vw; /* Change item width here */
-        }
-        #div-headlines {
-            margin-right: 100px;
-        }
-        ul {
-            padding: 2%;
-        }
+/* Responsive behaviour: allow horizontal scroll for headers and rows if many columns */
+.columns-header-inner, .item-row {
+    overflow-x: auto;
+}
+
+/* Tweak for small screens */
+@media (max-width: 480px) {
+    .cell-input, .total-cell {
+        width: 72px;
+        font-size: 14px;
+    }
+    .row-name-input {
+        min-width: 100px;
+    }
+    .col-name-input {
+        min-width: 60px;
+    }
 }
