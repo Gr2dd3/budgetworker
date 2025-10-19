@@ -70,16 +70,13 @@ input {
 /* --- DYNAMISKA KOLUMNRUBRIKER (Tvingad Grid-Justering) --- */
 /* ------------------------------------------------------------------------- */
 
+/* I styles.css: Sektionen för rubriker */
 #div-headlines { 
     display: grid;
-    /* 2fr (Namn) | 1fr (Expected) | 1fr (Actual) | 1fr (Extra) | auto (Knapp) */
-    grid-template-columns: 2fr 1fr 1fr 1fr auto; 
+    /* NYTT VÄRDE: 1.5fr är smalare än 2fr, vilket drar de tre rubrikerna åt vänster */
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     gap: 5px;
-    padding: 0 5px;
-    margin-bottom: 5px;
-    border-bottom: 1px solid #ccc;
-    align-items: center;
-    margin-right: 5px; 
+    /* ... resten av stilen ... */
 } 
 
 /* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
@@ -115,14 +112,15 @@ input {
 /* --- UPPDATERAD STIL FÖR ITEM-RADEN OCH INPUTS --- */
 /* ------------------------------------------------------------------------- */
 
+/* I styles.css: Sektionen för items (MÅSTE MATCHA!) */
 .item { 
-    display: grid; /* Använd GRID för att tvinga fram kolumnjustering */
-    grid-template-columns: 2fr 1fr 1fr 1fr auto; /* MÅSTE MATCHA #div-headlines EXAKT */
+    display: grid; 
+    /* NYTT VÄRDE: Måste matcha rubrikerna för att linjera perfekt */
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     align-items: center; 
     gap: 5px; 
-    max-width: 95%; 
-    padding: 5px 0;
-} 
+    /* ... resten av stilen ... */
+}
 
 .item input[type="text"] {
     /* Måste ligga i grid-kolumn 1 */
