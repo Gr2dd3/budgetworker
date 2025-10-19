@@ -67,55 +67,64 @@ const setTextContent = (id, text) => {
 };
 
 const calculateTotals = () => {
-    // VIKTIG ÄNDRING: Uppdaterad för att använda dynamiska kolumnnamn
     const columnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
     
-    let totalCol1 = 0; // motsvarar "expected"
-    let totalCol2 = 0; // motsvarar "actual"
-    let totalCol3 = 0; // motsvarar "extra"
-
-    categories.forEach(category => {
-        category.items.forEach(item => {
-            totalCol1 += parseFloat(item.expected) || 0;
-            totalCol2 += parseFloat(item.actual) || 0;
-            totalCol3 += parseFloat(item.extra) || 0;
-        });
-    });
-
-    // Uppdatera DOM
-    setTextContent("total-budget-col1", `Totalt ${columnNames[0]}: ${totalCol1} kr`);
-    setTextContent("total-budget-col2", `Totalt ${columnNames[1]}: ${totalCol2} kr`);
-    setTextContent("total-budget-col3", `Totalt ${columnNames[2]}: ${totalCol3} kr`);
-
-    // Om du vill visa "budgetresultat" som tidigare (inkomst - utgift)
+    // Totaler för de tre kolumnerna
     let totalIncome1 = 0, totalExpense1 = 0;
     let totalIncome2 = 0, totalExpense2 = 0;
     let totalIncome3 = 0, totalExpense3 = 0;
 
     categories.forEach(category => {
         category.items.forEach(item => {
+            const expected = parseFloat(item.expected) || 0;
+            const actual = parseFloat(item.actual) || 0;
+            const extra = parseFloat(item.extra) || 0;
+            
             if (category.type === "income") {
-                totalIncome1 += parseFloat(item.expected) || 0;
-                totalIncome2 += parseFloat(item.actual) || 0;
-                totalIncome3 += parseFloat(item.extra) || 0;
+                totalIncome1 += expected;
+                totalIncome2 += actual;
+                totalIncome3 += extra;
             } else if (category.type === "expense") {
-                totalExpense1 += parseFloat(item.expected) || 0;
-                totalExpense2 += parseFloat(item.actual) || 0;
-                totalExpense3 += parseFloat(item.extra) || 0;
+                totalExpense1 += expected;
+                totalExpense2 += actual;
+                totalExpense3 += extra;
             }
         });
     });
 
-    setTextContent("total-expected", `Budgetresultat (${columnNames[0]}): ${totalIncome1 - totalExpense1} kr`);
-    setTextContent("total-actual", `Budgetresultat (${columnNames[1]}): ${totalIncome2 - totalExpense2} kr`);
-    setTextContent("total-extra", `Budgetresultat (${columnNames[2]}): ${totalIncome3 - totalExpense3} kr`);
+    // Beräkna totalt budgetresultat
+    const totalResult1 = totalIncome1 - totalExpense1;
+    const totalResult2 = totalIncome2 - totalExpense2;
+    const totalResult3 = totalIncome3 - totalExpense3; // För den tredje kolumnen
+
+    // --- UPPDATERING AV DOM-ELEMENT (De tre summeringsblocken längst ner) ---
     
-    // NY SUMMERING: Den tredje summeringen som summerar den tredje kolumnen
-    // Vi använder ett nytt ID: total-difference (motsvarar de gamla total-budget-elementen som nu har de nya namnen)
-    setTextContent("total-difference", `Total skillnad (${columnNames[1]} - ${columnNames[0]}): ${totalCol2 - totalCol1} kr`);
+    // Kolumn 1 (Förmodad/Expected) - Använder de nya ID:na från HTML-uppdateringen
+    setTextContent("col1-income", `Inkomst: ${totalIncome1} kr`);
+    setTextContent("col1-expense", `Utgift: ${totalExpense1} kr`);
+    setTextContent("total-expected", `${columnNames[0]} Totalt: ${totalResult1} kr`);
+
+    // Kolumn 2 (Faktisk/Actual)
+    setTextContent("col2-income", `Inkomst: ${totalIncome2} kr`);
+    setTextContent("col2-expense", `Utgift: ${totalExpense2} kr`);
+    setTextContent("total-actual", `${columnNames[1]} Totalt: ${totalResult2} kr`);
+
+    // Kolumn 3 (Extra/Dynamisk)
+    setTextContent("col3-income", `Inkomst: ${totalIncome3} kr`);
+    setTextContent("col3-expense", `Utgift: ${totalExpense3} kr`);
+    setTextContent("total-extra", `${columnNames[2]} Totalt: ${totalResult3} kr`);
+
+    // NY SUMMERING: Den tredje summeringen som summerar skillnaden (Faktisk - Förmodad)
+    setTextContent("total-difference", `Total skillnad (${columnNames[1]} - ${columnNames[0]}): ${totalResult2 - totalResult1} kr`);
+    
+    // --- Vi behåller de gamla totalbudget-ID:na men använder dem för den totala inkomsten/utgiften om nödvändigt ---
+    // (Dessa ID:n används inte längre i den nya totalsummans struktur, men behålls ifall de används någon annanstans)
+    setTextContent("total-budget-col1", `Totalt ${columnNames[0]}: ${totalIncome1 + totalExpense1} kr`);
+    setTextContent("total-budget-col2", `Totalt ${columnNames[1]}: ${totalIncome2 + totalExpense2} kr`);
+    setTextContent("total-budget-col3", `Totalt ${columnNames[2]}: ${totalIncome3 + totalExpense3} kr`);
 };
 
-// Räkna ut totalen för varje kategori
+// Räkna ut totalen för varje kategori (Denna funktion används inte längre i UI men behålls ifall den används internt)
 const calculateCategoryTotals = (category) => {
     let totalExpected = 0;
     let totalActual = 0;
@@ -144,7 +153,7 @@ const renderCategories = () => {
         return;
     }    
     
-    // VIKTIG ÄNDRING: Hämta de nuvarande kolumnnamnen för enhetlighet
+    // Hämta de nuvarande kolumnnamnen för enhetlighet
     const currentColumnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
 
     categories.forEach((category, index) => {
@@ -163,8 +172,6 @@ const renderCategories = () => {
         colorInput.onchange = () => {
             categories[index].color = colorInput.value;
             categoryEl.style.backgroundColor = colorInput.value;
-            // Ingen renderCategories här, det görs vid sparning
-            // Men i ditt original anropades det:
             renderCategories();
             calculateTotals();
         };
@@ -228,7 +235,7 @@ const renderCategories = () => {
             colHeadline.onblur = () => {
                 const newName = colHeadline.textContent.trim();
                 if (newName) {
-                    // VIKTIG ÄNDRING: Uppdatera kolumnnamn på ALLA kategorier 
+                    // UPPDATERA kolumnnamn på ALLA kategorier 
                     categories.forEach(cat => {
                         cat.columnNames = cat.columnNames || ["Förmodad", "Faktisk", "Extra"];
                         cat.columnNames[colIndex] = newName;
@@ -252,6 +259,7 @@ const renderCategories = () => {
 
             // Namn
             const itemName = document.createElement("input");
+            itemName.type = "text"; // För att se till att den har rätt typ
             itemName.value = item.name;
             itemName.placeholder = "Namn";
             itemName.onchange = () => {
@@ -289,20 +297,15 @@ const renderCategories = () => {
         });
         categoryEl.appendChild(itemList);
 
-        // Totals
-        const totals = {
-            totalExpected: category.items.reduce((sum, i) => sum + (parseFloat(i.expected) || 0), 0),
-            totalActual: category.items.reduce((sum, i) => sum + (parseFloat(i.actual) || 0), 0),
-            totalExtra: category.items.reduce((sum, i) => sum + (parseFloat(i.extra) || 0), 0),
-        };
+        // !!! BORTTAGEN KOD: Den oönskade summeringen i kategorin !!!
+        /*
         const totalsDiv = document.createElement("div");
         totalsDiv.classList.add("category-totals");
         totalsDiv.innerHTML = `
-            <strong>${category.columnNames[0]}:</strong> ${totals.totalExpected} kr<br>
-            <strong>${category.columnNames[1]}:</strong> ${totals.totalActual} kr<br>
-            <strong>${category.columnNames[2]}:</strong> ${totals.totalExtra} kr
+            ... borttagen summeringskod ...
         `;
         categoryEl.appendChild(totalsDiv);
+        */
 
         // Lägg till item
         const addItemButton = document.createElement("button");
@@ -330,14 +333,15 @@ const renderCategories = () => {
     });
 };
 
+// ... resten av JS-filen (loadCategories, saveCategoriesToFirestore, etc.) är oförändrad ...
+
 // Ladda kategorier vid start av app
 const loadCategories = async () => {
     // normalizeCategories(); 
     try {
         categories = await fetchCategoriesFromFirestore();
         if (categories.length > 0) {
-            // VIKTIG ÄNDRING: Sätt samma kolumnnamn på alla kategorier vid laddning 
-            // för att säkerställa enhetlighet i UI:t.
+            // Sätt samma kolumnnamn på alla kategorier vid laddning 
             const names = categories[0].columnNames;
             categories.forEach(cat => cat.columnNames = names);
         }
@@ -376,7 +380,7 @@ const saveCategoriesToFirestore = async (categories) => {
     try {
         const categoriesCollection = collection(db, "categories");
 
-        // VIKTIG ÄNDRING: Hämta de nuvarande kolumnnamnen från den första kategorin
+        // Hämta de nuvarande kolumnnamnen från den första kategorin
         const columnNamesToSave = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
 
         for (const category of categories) {
@@ -437,7 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addCategoryButton = document.getElementById("add-category");
     if (addCategoryButton) {
         addCategoryButton.addEventListener("click", async () => {
-            // VIKTIG ÄNDRING: Hämta de aktuella kolumnnamnen från en befintlig kategori, annars standard
+            // Hämta de aktuella kolumnnamnen från en befintlig kategori, annars standard
             const currentColumnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
 
             const newCategoryData = {

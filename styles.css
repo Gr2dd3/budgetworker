@@ -74,16 +74,9 @@ input {
 } 
 
 
-
-/* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT V2) --- */
-/* Ersätter den gamla #div-headlines-sektionen */
+/* --- DYNAMISKA KOLUMNRUBRIKER (FINPUTSAD LAYOUT V3) --- */
 #div-headlines { 
     display: grid;
-    /* VIKTIGT: Anpassar grid-kolumnerna:
-       1: Namn-input (2fr)
-       2, 3, 4: Siffer-inputs (1fr, 1fr, 1fr)
-       5: Tomt utrymme för Ta Bort-knappen (auto)
-    */
     grid-template-columns: 2fr 1fr 1fr 1fr auto; 
     gap: 5px;
     padding: 0 5px;
@@ -105,24 +98,22 @@ input {
 }
 
 /* Stilar för varje individuell rubrik */
-/* Ersätter den gamla .category h5 eller liknande stilar */
 #div-headlines h5 {
     font-size: 0.9em;
     font-weight: bold;
     margin: 0;
     
-    /* Justerar texten åt höger */
     text-align: right; 
     
-    /* Skapar den nödvändiga marginalen/paddingen för att centrera rubriken över siffrorna */
-    padding-right: 25%; 
+    /* Justering för att centrera över siffrorna */
+    padding-right: 35%; 
     
     cursor: text;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     
-    /* NYTT: Vit bakgrund för redigerbara fält */
+    /* Vit bakgrund för redigerbara fält */
     background-color: white; 
     border-radius: 3px;
     border: 1px solid #ccc;
@@ -130,8 +121,7 @@ input {
     padding-bottom: 2px;
 }
 
-/* --- UPPDATERAD STIL FÖR ITEM-RADEN (VIKTIGT för att matcha gridet ovan) --- */
-/* Ersätter den gamla .item-sektionen */
+/* --- UPPDATERAD STIL FÖR ITEM-RADEN (VIKTIGT) --- */
 .item { 
     pointer-events: auto; 
     user-select: none; 
@@ -142,7 +132,6 @@ input {
     padding: 5px 0;
 } 
 
-/* Ersätter den gamla #item-name och .item input-sektionen */
 .item input[type="text"] {
     flex: 2; 
     min-width: 100px;
@@ -158,7 +147,7 @@ input {
     margin: 0;
 }
 
-/* --- NY STIL FÖR TOTALSUMMERINGARNA LÄNGST NER (Ersätter .probTotal och .actuTotal) --- */
+/* --- NY STIL FÖR TOTALSUMMERINGARNA LÄNGST NER (Tre block i rad) --- */
 
 #totals {
     margin-top: 20px;
@@ -168,54 +157,51 @@ input {
     border-radius: 5px;
 }
 
-hr {
-    border: none;
-    border-top: 1px dashed #ccc;
-    margin: 10px 0;
-}
-
-/* De tre översta summeringsraderna (Total Budget Kolumn 1, 2, 3) */
-#total-summary-rows {
+#column-totals-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    border-style: dashed; 
-    border-color: black; 
-    border-width: 1px; 
-    padding: 2px; 
-    background-color: #f1f0f0d2; /* Bevarar stilen från gamla .probTotal */
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-#total-summary-rows p {
+.total-column-block {
     flex: 1;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
     text-align: center;
-    font-weight: bold;
-    color: #444;
-    padding: 0 5px;
-    font-size: 1em;
+    background-color: #f1f1f1;
 }
 
-/* Budgetresultat (Inkomst - Utgift) för de tre kolumnerna */
-#budget-results {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px 0;
-    border-style: solid; 
-    border-color: black; 
-    border-width: 2px; 
-    padding: 2px; 
-    background-color: #a7e7d8d2; /* Bevarar stilen från gamla .actuTotal */
+.total-column-block h3 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    color: #333;
 }
 
-#budget-results h3 {
-    flex: 1;
-    text-align: center;
-    color: #007bff; 
+/* Stilar för inkomst och utgift rader */
+.total-column-block p {
+    margin: 2px 0;
+    font-size: 0.9em;
+    font-weight: normal;
+}
+
+/* Stilar för själva totalresultatet */
+.total-column-block h3[id^="total-"] {
+    margin-top: 10px;
     font-size: 1.1em;
-    padding: 0 5px;
+    font-weight: bold;
+    color: #007bff; /* Blå färg för resultat */
+    border-top: 1px solid #bbb;
+    border-bottom: none;
+    padding-top: 5px;
 }
 
-/* Den NYA TREDJE SUMMERINGEN: Total skillnad (Faktisk - Förmodad) */
+
+/* Den NYA TREDJE SUMMERINGEN: Total skillnad */
 #final-difference {
     text-align: center;
     padding: 10px 0;
@@ -233,16 +219,18 @@ hr {
 }
 
 
-/* --- MEDIA QUERIES --- */
+hr {
+    border: none;
+    border-top: 1px dashed #ccc;
+    margin: 10px 0;
+}
+
+
+/* --- MEDIA QUERIES (OFÖRÄNDRADE) --- */
 
 @media (min-width: 415px) { 
     input { 
-        max-width: 21vw; /* Change item width here */ 
-    } 
-    
-    #div-headlines { 
-        /* Marginalen är inte längre nödvändig med grid layout, men behålls om du vill justera avstånd */
-        /* margin-right: 25vw; */ 
+        max-width: 21vw; 
     } 
     
     ul { 
@@ -252,11 +240,7 @@ hr {
 
 @media (min-width: 660px) { 
     input { 
-        max-width: 34vw; /* Change item width here */ 
-    } 
-    
-    #div-headlines { 
-        /* margin-right: 100px; */ 
+        max-width: 34vw; 
     } 
     
     ul { 

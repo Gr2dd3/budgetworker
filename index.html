@@ -25,27 +25,38 @@
             <button id="save-button">Spara ändringar</button>
         </div>
         
-        <div id="totals">
-            <div id="total-summary-rows">
-                <p id="total-budget-col1">Totala summering 1: 0 kr</p>
-                <p id="total-budget-col2">Totala summering 2: 0 kr</p>
-                <p id="total-budget-col3">Totala summering 3: 0 kr</p>
-            </div>
-
-            <hr>
-
-            <div id="budget-results">
-                <h3 id="total-expected">Budgetresultat (Förmodad): 0 kr</h3>
-                <h3 id="total-actual">Budgetresultat (Faktisk): 0 kr</h3>
-                <h3 id="total-extra">Budgetresultat (Extra): 0 kr</h3>
-            </div>
+<div id="totals">
             
+            <div id="column-totals-container">
+                
+                <div class="total-column-block" id="col-block-1">
+                    <h3>Förmodad</h3>
+                    <p id="col1-income">Inkomst: 0 kr</p>
+                    <p id="col1-expense">Utgift: 0 kr</p>
+                    <h3 id="total-expected">Totalt: 0 kr</h3>
+                </div>
+
+                <div class="total-column-block" id="col-block-2">
+                    <h3>Faktisk</h3>
+                    <p id="col2-income">Inkomst: 0 kr</p>
+                    <p id="col2-expense">Utgift: 0 kr</p>
+                    <h3 id="total-actual">Totalt: 0 kr</h3>
+                </div>
+
+                <div class="total-column-block" id="col-block-3">
+                    <h3>Extra</h3>
+                    <p id="col3-income">Inkomst: 0 kr</p>
+                    <p id="col3-expense">Utgift: 0 kr</p>
+                    <h3 id="total-extra">Totalt: 0 kr</h3>
+                </div>
+
+            </div>
+
             <hr>
 
             <div id="final-difference">
                 <h3 id="total-difference">Total skillnad: 0 kr</h3>
             </div>
-        </div>
         </div>
 
     <script src="dist/bundle.js"></script>
