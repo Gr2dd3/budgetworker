@@ -68,7 +68,7 @@ input {
 /* I styles.css: Sektionen för rubriker */
 #div-headlines {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1fr auto; /* Samma som .item */
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item */
     gap: 5px;
     margin: 0; /* Viktigt – ta bort förskjutningen */
 }
