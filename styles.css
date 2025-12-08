@@ -76,7 +76,7 @@ input {
     /* NYTT VÄRDE: 1.5fr är smalare än 2fr, vilket drar de tre rubrikerna åt vänster */
     grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     gap: 5px;
-    /* ... resten av stilen ... */
+    margin-right: 2.5rem;
 } 
 
 /* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
