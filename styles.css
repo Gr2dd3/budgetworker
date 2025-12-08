@@ -86,7 +86,7 @@ input {
     margin: 0;
     
     /* Centrerar texten perfekt i mitten av sin grid-kolumn */
-    text-align: left; 
+    text-align: center; 
     padding-right: 0; /* Tar bort gammal padding */
     
     cursor: text;
