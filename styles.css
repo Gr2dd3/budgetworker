@@ -68,9 +68,9 @@ input {
 /* I styles.css: Sektionen för rubriker */
 #div-headlines {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item */
+    grid-template-columns: 1.3fr 1fr 1fr 1fr auto; /* Samma som .item */
     gap: 5px;
-    margin: 0; /* Viktigt – ta bort förskjutningen */
+    margin-right: 2rem; /* Viktigt – ta bort förskjutningen */
 }
 
 /* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
@@ -86,7 +86,7 @@ input {
     margin: 0;
     
     /* Centrerar texten perfekt i mitten av sin grid-kolumn */
-    text-align: center; 
+    text-align: left;
     padding-right: 0; /* Tar bort gammal padding */
     
     cursor: text;
@@ -99,6 +99,7 @@ input {
     border: 1px solid #ccc;
     padding-top: 2px;
     padding-bottom: 2px;
+    padding-left: 0.3rem;
     width: auto; 
 }
 
