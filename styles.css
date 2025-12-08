@@ -65,19 +65,13 @@ input {
     margin: 0; 
 } 
 
-
-/* ------------------------------------------------------------------------- */
-/* --- DYNAMISKA KOLUMNRUBRIKER (Tvingad Grid-Justering) --- */
-/* ------------------------------------------------------------------------- */
-
 /* I styles.css: Sektionen för rubriker */
-#div-headlines { 
+#div-headlines {
     display: grid;
-    /* NYTT VÄRDE: 1.5fr är smalare än 2fr, vilket drar de tre rubrikerna åt vänster */
-    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item */
     gap: 5px;
-    margin-right: 2.5rem;
-} 
+    margin: 0; /* Viktigt – ta bort förskjutningen */
+}
 
 /* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
 /* OBS: Dessa behövs inte tekniskt sett när alla h5 är i div-headlines, men behålls för tydlighet */
@@ -108,11 +102,6 @@ input {
     width: auto; 
 }
 
-/* ------------------------------------------------------------------------- */
-/* --- UPPDATERAD STIL FÖR ITEM-RADEN OCH INPUTS --- */
-/* ------------------------------------------------------------------------- */
-
-/* I styles.css: Sektionen för items (MÅSTE MATCHA!) */
 .item { 
     display: grid; 
     /* NYTT VÄRDE: Måste matcha rubrikerna för att linjera perfekt */
