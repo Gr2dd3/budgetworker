@@ -69,7 +69,7 @@ input {
 #div-headlines {
     display: grid;
     grid-template-columns: 1.3fr 1fr 1fr 1fr auto; /* Samma som .item */
-    gap: 5px;
+    gap: 2px;
     margin-right: 2rem; /* Viktigt – ta bort förskjutningen */
 }
 
