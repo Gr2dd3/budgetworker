@@ -68,7 +68,7 @@ input {
 /* I styles.css: Sektionen för rubriker */
 #div-headlines {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item */
+    grid-template-columns: 1.3fr 1fr 1fr 1fr auto; /* Samma som .item */
     gap: 5px;
     margin: 0; /* Viktigt – ta bort förskjutningen */
 }
@@ -117,6 +117,7 @@ input {
     flex: none; /* Inaktiverar gammal flex-baserad bredd */
     min-width: 100px;
     width: 100%; /* Fyller hela grid-cellen */
+    text-align: right;
 }
 
 /* Kolumn 1 för inputs (expected) - input:nth-of-type(2) */
