@@ -86,7 +86,7 @@ input {
     margin: 0;
     
     /* Centrerar texten perfekt i mitten av sin grid-kolumn */
-    text-align: center; 
+    text-align: left; 
     padding-right: 0; /* Tar bort gammal padding */
     
     cursor: text;
@@ -117,7 +117,7 @@ input {
     flex: none; /* Inaktiverar gammal flex-baserad bredd */
     min-width: 100px;
     width: 100%; /* Fyller hela grid-cellen */
-    text-align: right;
+    text-align: left;
 }
 
 /* Kolumn 1 för inputs (expected) - input:nth-of-type(2) */
