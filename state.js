@@ -8,21 +8,11 @@ export function setCategories(list) {
     categories = list;
 }
 
-// Normalisera kategori-ID
-export function normalizeCategories() {
-    categories.forEach(category => {
-        if (!category.id.startsWith("temp_")) {
-            console.log(`Kategori-ID verifierad: ${category.id}`);
-        } else {
-            console.warn(`Kategori har ett temporärt ID: ${category.id}`);
-        }
-    });
-}
-
 // Ladda kategorier
 export async function loadCategories() {
     try {
         categories = await fetchCategoriesFromFirestore();
+        normalizeCategories();
         if (categories.length > 0) {
             const names = categories[0].columnNames || ["Förmodad","Faktisk","Extra"];
             categories.forEach(cat => cat.columnNames = names);
@@ -34,4 +24,16 @@ export async function loadCategories() {
         alert("Kunde inte ladda kategorier.");
     }
 }
+
+// Normalisera kategori-ID
+function normalizeCategories() {
+    categories.forEach(category => {
+        if (!category.id.startsWith("temp_")) {
+            console.log(`Kategori-ID verifierad: ${category.id}`);
+        } else {
+            console.warn(`Kategori har ett temporärt ID: ${category.id}`);
+        }
+    });
+}
+
 

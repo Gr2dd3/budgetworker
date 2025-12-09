@@ -3,7 +3,11 @@ body {
     margin: 0; 
     background-color: #f4f4f4; 
 } 
-    
+
+/* ========================================================================== */
+/* LAYOUT OCH VISIBILITY */
+/* ========================================================================== */
+
 .hidden { 
     display: none; 
 } 
@@ -16,6 +20,10 @@ body {
     border-radius: 5px; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 } 
+
+/* ========================================================================== */
+/* BUTTONS */
+/* ========================================================================== */
 
 button { 
     margin-top: .05rem; 
@@ -31,9 +39,9 @@ button:hover {
     background-color: gray; 
 } 
 
-ul { 
-    padding: .5rem; 
-} 
+/* ========================================================================== */
+/* FORMS: INPUT */
+/* ========================================================================== */
 
 input { 
     display: block; 
@@ -43,6 +51,10 @@ input {
     border: 1px solid #ccc; 
     border-radius: 5px; 
 } 
+
+/* ========================================================================== */
+/* CATEGORIES */
+/* ========================================================================== */
 
 #category-list { 
     list-style: none; 
@@ -57,95 +69,88 @@ input {
     background-color: #f9f9f9; 
 } 
 
-#category-name { 
-    margin-top: 2rem; 
-} 
-
 .category h3 { 
     margin: 0; 
 } 
 
-/* I styles.css: Sektionen för rubriker */
-#div-headlines {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1fr auto; /* Samma som .item */
-    gap: 2px;
-    margin-right: 2rem; /* Viktigt – ta bort förskjutningen */
+#category-name { 
+    margin-top: 2rem; 
 }
 
-/* Placerar de tre rubrikerna i kolumn 2, 3 och 4 */
-/* OBS: Dessa behövs inte tekniskt sett när alla h5 är i div-headlines, men behålls för tydlighet */
-#div-headlines h5:nth-child(1) { grid-column: 2; }
-#div-headlines h5:nth-child(2) { grid-column: 3; }
-#div-headlines h5:nth-child(3) { grid-column: 4; }
+ul { 
+    padding: .5rem; 
+} 
 
-/* Stilar för varje individuell rubrik */
-#div-headlines h5 {
-    font-size: 0.9em;
+/* ========================================================================== */
+/* COLUMN HEADERS */
+/* ========================================================================== */
+
+#div-headlines {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item för exakt alignment */
+    gap: 5px;
+    margin-right: 2rem;
+    margin-bottom: 5px;
+}
+
+/* Placerar de 3 rubrikerna i kolumn 2, 3 och 4 (över de 3 numeric kolumnerna) */
+#div-headlines input:nth-of-type(1) { grid-column: 2; }
+#div-headlines input:nth-of-type(2) { grid-column: 3; }
+#div-headlines input:nth-of-type(3) { grid-column: 4; }
+
+#div-headlines input[type="text"] {
+    font-size: 0.85em;
     font-weight: bold;
-    margin: 0;
-    
-    /* Centrerar texten perfekt i mitten av sin grid-kolumn */
-    text-align: left;
-    padding-right: 0; /* Tar bort gammal padding */
-    
+    text-align: center;
     cursor: text;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    
+    flex: none;
+    width: 100%;
+    min-width: 50px;
     background-color: white; 
     border-radius: 3px;
     border: 1px solid #ccc;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 0.3rem;
-    width: auto; 
+    padding: 2px 2px;
+    box-sizing: border-box;
 }
+
+/* ========================================================================== */
+/* ITEMS (ROWS) */
+/* ========================================================================== */
 
 .item { 
     display: grid; 
-    /* NYTT VÄRDE: Måste matcha rubrikerna för att linjera perfekt */
     grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     align-items: center; 
     gap: 5px; 
-    /* ... resten av stilen ... */
 }
 
 .item input[type="text"] {
-    /* Måste ligga i grid-kolumn 1 */
     grid-column: 1 / span 1;
-    flex: none; /* Inaktiverar gammal flex-baserad bredd */
+    flex: none;
     min-width: 100px;
-    width: 100%; /* Fyller hela grid-cellen */
+    width: 100%;
 }
 
-/* Kolumn 1 för inputs (expected) - input:nth-of-type(2) */
 .item input:nth-of-type(2) { grid-column: 2 / span 1; }
-
-/* Kolumn 2 för inputs (actual) - input:nth-of-type(3) */
 .item input:nth-of-type(3) { grid-column: 3 / span 1; }
-
-/* Kolumn 3 för inputs (extra) - input:nth-of-type(4) */
 .item input:nth-of-type(4) { grid-column: 4 / span 1; }
 
 .item input[type="number"] {
-    flex: none; /* Inaktiverar gammal flex-baserad bredd */
+    flex: none;
     text-align: right;
     min-width: 50px;
     width: 100%;
 }
 
 .item button {
-    /* Ligger i sista kolumnen */
     grid-column: 5 / span 1;
     margin: 0;
     width: 100%;
 }
 
-/* ------------------------------------------------------------------------- */
-/* --- STIL FÖR TOTALSUMMERINGARNA LÄNGST NER (Tre block i rad) --- */
-/* ------------------------------------------------------------------------- */
+/* ========================================================================== */
+/* TOTALS SECTION */
+/* ========================================================================== */
 
 #totals {
     margin-top: 20px;
@@ -180,27 +185,25 @@ input {
     color: #333;
 }
 
-/* Stilar för inkomst och utgift rader */
 .total-column-block p {
     margin: 2px 0;
     font-size: 0.9em;
     font-weight: normal;
 }
 
-/* Stilar för själva totalresultatet */
 .total-column-block h3[id^="total-"] {
     margin-top: 10px;
     font-size: 1.1em;
     font-weight: bold;
-    color: #007bff; /* Blå färg för resultat */
+    color: #007bff;
     border-top: 1px solid #bbb;
     border-bottom: none;
     padding-top: 5px;
 }
 
-/* ------------------------------------------------------------------------- */
-/* --- MEDIA QUERIES --- */
-/* ------------------------------------------------------------------------- */
+/* ========================================================================== */
+/* RESPONSIVE */
+/* ========================================================================== */
 
 @media (min-width: 415px) { 
     input { 

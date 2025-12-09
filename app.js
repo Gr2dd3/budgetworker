@@ -1,26 +1,50 @@
 
-import { validCredentials } from "./login.js";
 import { loadCategories, categories } from "./state.js";
 import { renderCategories } from "./ui.js";
 import { calculateTotals } from "./totals.js";
 import { saveCategoriesToFirestore } from "./firestoreservice.js";
+import { signInUser } from "./firebase.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
     const loginScreen = document.getElementById("login-screen");
     const appScreen = document.getElementById("app");
-    const errorMessage = document.getElementById("error-message");
+    const errorMessageElement = document.getElementById("error-message-element");
 
     const loginButton = document.getElementById("login-button");
-    loginButton.addEventListener("click", () => {
-        const username = document.getElementById("username").value;
+        console.log("Hello");
+    loginButton.addEventListener("click", async () => {
+        const email = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
+        console.log("starting to login with email: " + email);
+        // Anropa din importerade funktion
+        const result = await signInUser(email, password);
+
+        console.log("result: " + result);
+        console.log("is success? " + result.success);
+        if (result.success) {
+            console.log("Användare inloggad:", result.user.email);
+            errorMessageElement.textContent = "";
             loginScreen.classList.add("hidden");
             appScreen.classList.remove("hidden");
             loadCategories();
         } else {
-            errorMessage.textContent = "Fel användarnamn eller lösenord.";
+            const error = result.error;
+            const errorCode = error.code;
+            const errorMessageText = error.message;
+
+            console.error("Inloggningsfel:", errorCode, errorMessageText);
+
+            // Visa ett användarvänligt felmeddelande
+            if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
+                errorMessageElement.textContent = "Felaktig e-postadress eller lösenord.";
+            } else if (errorCode === 'auth/invalid-email') {
+                errorMessageElement.textContent = "Ogiltig e-postadress.";
+            } else if (errorCode === 'auth/user-disabled') {
+                errorMessageElement.textContent = "Detta användarkonto har inaktiverats.";
+            } else {
+                errorMessageElement.textContent = "Ett oväntat fel uppstod vid inloggning.";
+            }
         }
     });
 
@@ -53,98 +77,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-import { fetchCategoriesFromFirestore, saveCategoriesToFirestore, deleteCategoryFromFirestore } from '.\firestoreservice.js';
-import { validCredentials } from './login';
-import { calculateTotals } from './totals';
-
-// Rendera kategorier
-const categoryList = document.getElementById("category-list");
-
-document.addEventListener("DOMContentLoaded", () => {
-    // Logga in
-    const loginScreen = document.getElementById("login-screen");
-    const appScreen = document.getElementById("app");
-    const errorMessage = document.getElementById("error-message");
-    const loginButton = document.getElementById("login-button");
-
-    loginButton.addEventListener("click", () => {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-    
-        if (username === validCredentials.username && CryptoJS.MD5(password).toString() === validCredentials.passwordHash) {
-            loginScreen.classList.add("hidden");
-            appScreen.classList.remove("hidden");
-            loadCategories();
-            renderCategories();
-            calculateTotals();
-        } else {
-            errorMessage.textContent = "Fel användarnamn eller lösenord.";
-        }
-    });
-
-    // Addera kategorier
-    const addCategoryButton = document.getElementById("add-category");
-    if (addCategoryButton) {
-        addCategoryButton.addEventListener("click", async () => {
-            // Hämta de aktuella kolumnnamnen från en befintlig kategori, annars standard
-            const currentColumnNames = categories[0]?.columnNames || ["Förmodad", "Faktisk", "Extra"];
-
-            const newCategoryData = {
-                name: "Ny kategori",
-                color: "#f9f9f9",
-                type: "expense",
-                items: [],
-                order: categories.length + 1,
-                columnNames: currentColumnNames, // Lägg till kolumnnamnen här
-            };
-            
-            const newCategoryRef = await addDoc(collection(db, "categories"), newCategoryData);
-            
-            // Pusha till den lokala arrayen med det nya ID:t och datan
-            categories.push({
-                id: newCategoryRef.id,
-                ...newCategoryData
-            });
-            
-            renderCategories();
-            calculateTotals();
-        });
-    } else {
-        console.error("Add category button not found!");
-    }
-    
-    // SPARA KNAPPEN
-    const saveButton = document.getElementById("save-button");
-    if (saveButton) {
-        saveButton.addEventListener("click", async () => {
-            try {
-                await saveCategoriesToFirestore(categories);
-                renderCategories();
-                calculateTotals();
-                alert("Kategorier sparade!");
-            } catch (error) {
-                console.error("Fel vid sparning:", error);
-                alert("Misslyckades att spara kategorier.");
-            }
-        });    
-    } else {
-        console.error("Save button not found!");
-    }
-});
-
-*/

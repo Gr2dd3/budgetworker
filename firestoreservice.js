@@ -3,7 +3,6 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy 
 
 // Hämta kategorier från Firestore
 export async function fetchCategoriesFromFirestore() {
-    normalizeCategories();
     const categoriesCollection = collection(db, "categories");
     const sortedQuery = query(categoriesCollection, orderBy("order"));
     const snapshot = await getDocs(sortedQuery);
