@@ -87,9 +87,9 @@ ul {
 
 #div-headlines {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr auto; /* Samma som .item för exakt alignment */
-    gap: 5px;
-    margin-right: 2rem;
+    grid-template-columns: 1.75fr 1fr 1fr 1fr auto; /* Samma som .item för exakt alignment */
+    gap: 10px;
+    margin-right: 3.3rem;
     margin-bottom: 5px;
 }
 
@@ -121,7 +121,7 @@ ul {
     display: grid; 
     grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     align-items: center; 
-    gap: 5px; 
+    gap: 2px; 
 }
 
 .item input[type="text"] {
