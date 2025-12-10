@@ -45,8 +45,8 @@ button:hover {
 
 input { 
     display: block; 
-    max-width: 20vw;
-    margin: 1px 1px; 
+    max-width: 80vw;
+    margin: 7px 1px; 
     padding: 1px; 
     border: 1px solid #ccc; 
     border-radius: 5px; 
@@ -87,10 +87,10 @@ ul {
 
 #div-headlines {
     display: grid;
-    grid-template-columns: 1.75fr 1fr 1fr 1fr auto; /* Samma som .item för exakt alignment */
-    gap: 10px;
-    margin-right: 3.3rem;
-    margin-bottom: 5px;
+    grid-template-columns: 1.7fr 1fr 1fr 1fr auto; /* Samma som .item för exakt alignment */
+    gap: 2px;
+    margin-right: 1rem;
+    margin-bottom: 3px;
 }
 
 /* Placerar de 3 rubrikerna i kolumn 2, 3 och 4 (över de 3 numeric kolumnerna) */
@@ -121,7 +121,7 @@ ul {
     display: grid; 
     grid-template-columns: 1.5fr 1fr 1fr 1fr auto; 
     align-items: center; 
-    gap: 2px; 
+    gap: 5px; 
 }
 
 .item input[type="text"] {
